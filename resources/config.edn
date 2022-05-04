@@ -1,0 +1,2 @@
+{:database {:url #env DATABASE_URL}
+ :server   {:port #or [#env PORT 3000]}}
