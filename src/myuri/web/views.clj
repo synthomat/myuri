@@ -3,26 +3,40 @@
             [ring.util.response :as resp]
             [ring.util.anti-forgery :refer [anti-forgery-field]]))
 
+(defn app-address
+  "docstring"
+  [req]
+  (str (-> req :scheme name) "://" (:server-name req) ":" (:server-port req)))
+
+(defn bookmarklet-address
+  "docstring"
+  [app-address]
+  (str "javascript:window.open('" app-address "/new?site_url='+encodeURIComponent(document.location.href)+'&site_title='+document.title, '', 'width=500,height=200')"))
+
+
 (defn header
   "docstring"
-  []
+  [req]
   [:div
    [:h1 "Bookmarks"]
    [:ul
     [:li [:a {:href "/"} "Home"]]
-    [:li [:a {:href "/new"} "New"]]]])
+    [:li [:a {:href "/new"} "New"]]
+    [:li [:a {:href (bookmarklet-address (app-address req))} "Save"]]]])
 
 (defn layout
-  [children]
+  [req & children]
   (->
     (html5
       [:body
-       (header)
+       (header req)
 
        [:div
         children]])
     (resp/response)
     (resp/content-type "text/html")))
+
+
 
 (defn new-bookmark-view
   "docstring"
@@ -52,8 +66,12 @@
      [:br]
      (:bookmarks/site_title bm)]))
 
+
+
+
 (defn index-view
   "docstring"
   [req bookmarks]
-  (layout
-    (bookmarks-table req bookmarks)))
+  (let [bookmarklet-addr (bookmarklet-address (app-address req))]
+    (layout req
+      (bookmarks-table req bookmarks))))

@@ -8,6 +8,7 @@
 
 (defn index-handler
   [{:keys [ds] :as req}]
+
   (let [bookmarks (db/bookmarks ds)]
     (-> (v/index-view req bookmarks))))
 
@@ -29,7 +30,7 @@
 (defn not-found-handler
   "docstring"
   [req]
-  (-> (v/layout [:h2 {:style "color: red"} "Page not found"])
+  (-> (v/layout req [:h2 {:style "color: red"} "Page not found"])
       (res/status 404)))
 
 (def routes
