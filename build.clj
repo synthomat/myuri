@@ -2,7 +2,7 @@
   (:refer-clojure :exclude [test])
   (:require [org.corfield.build :as bb]))
 
-(def lib 'net.clojars.synthomat/myurl)
+(def lib 'net.clojars.synthomat/myuri)
 (def version "0.1.0-SNAPSHOT")
 (def main 'myuri.core)
 
