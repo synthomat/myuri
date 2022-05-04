@@ -23,8 +23,12 @@ jobs:
           # (optional) To avoid rate limit errors please provide github token
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run tests and build artifact
-        run: clojure -T:build ci
+      - name: Run tests
+        run: clojure -T:build test
+
+      - name: Build artifact
+        if: startsWith(github.ref, 'refs/tags/')
+        run: clojure -T:build uber
 
       - name: Release
         uses: softprops/action-gh-release@v1
