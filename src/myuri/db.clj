@@ -16,6 +16,11 @@
   [ds data]
   (sql/insert! ds :bookmarks data))
 
+(defn delete!
+  "docstring"
+  [ds bookmark-id]
+  (sql/delete! ds :bookmarks {:id bookmark-id}))
+
 (defn migratus-config
   "docstring"
   [ds]

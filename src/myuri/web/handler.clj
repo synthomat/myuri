@@ -22,7 +22,7 @@
   [{:keys [ds] :as req}]
   (if (is-post? req)
     (let [{:keys [site_url site_title]} (:params req)]
-      (db/store! ds {:site_url site_url
+      (db/store! ds {:site_url   site_url
                      :site_title site_title})
       (res/redirect "/"))
     (v/new-bookmark-view req)))
@@ -33,10 +33,25 @@
   (-> (v/layout req [:h2 {:style "color: red"} "Page not found"])
       (res/status 404)))
 
+(defn parse-int [s]
+  (Integer. (re-find #"[0-9]*" s)))
+
+(defn delete-bookmark-handler
+  "docstring"
+  [{:keys [ds params] :as req}]
+  (let [bookmark-id (-> params :id parse-int)]
+    (if (db/delete! ds bookmark-id)
+      (res/status 204)
+      (-> (res/response "Something bad happened")
+          (res/status 500)))))
+
+
+
 (def routes
-  ["/" {""    index-handler
-        "new" new-bookmark-handler
-        true  not-found-handler}])
+  ["/" {""                          index-handler
+        "new"                       new-bookmark-handler
+        ["bookmarks/" [#"\d+" :id]] {:delete {"" delete-bookmark-handler}}
+        true                        not-found-handler}])
 
 (defn wrap-system
   "docstring"
