@@ -1,7 +1,8 @@
 (ns myuri.web.views
   (:require [hiccup.page :as hp]
             [ring.util.response :as resp]
-            [ring.util.anti-forgery :refer [anti-forgery-field]]))
+            [ring.util.anti-forgery :refer [anti-forgery-field]])
+  (:import (java.text SimpleDateFormat)))
 
 (defn app-address
   "docstring"
@@ -15,7 +16,7 @@
 
 
 (defn site
-  "docstring"
+  "Base page skeleton"
   [req & children]
   (-> (hp/html5
         [:head
@@ -27,15 +28,23 @@
       (resp/response)
       (resp/content-type "text/html")))
 
-(defn header
+(defn navigation
   "docstring"
   [req]
   [:div
-   [:h1 "Bookmarks"]
-   [:ul
-    [:li [:a {:href "/"} "Home"]]
-    [:li [:a {:href "/new"} "New"]]
-    [:li [:a {:href (bookmarklet-address (app-address req))} "Save"]]]])
+   [:a {:href "/"} "Home"]
+   " – "
+   [:a {:href "/new"} "New"]
+   " – Bookmarklet: ["
+   [:a {:href (bookmarklet-address (app-address req))} "Save"]
+   "]"])
+
+(defn header
+  "docstring"
+  [req]
+  [:div.page-header
+   [:h1.logo "MyUri"]
+   (navigation req)])
 
 
 
@@ -43,10 +52,10 @@
   [req & children]
 
   (site req
-    (header req)
+        (header req)
 
-    [:div
-     children]))
+        [:div.page-container
+         children]))
 
 (defn new-bookmark-view
   "docstring"
@@ -55,31 +64,35 @@
         frame (if p site layout)]
 
     (frame req
-      [:form {:action "/new" :method "post"}
-       (anti-forgery-field)
-       [:input {:type "hidden" :name "p" :value p}]
-       [:p "URL:" [:br]
-        [:input {:type "text" :name "su" :value su :required "" :minlength 12 :size 50}]]
-       [:p "Title:" [:br]
-        [:input {:type "text" :name "st" :value st :size 50}]]
-       [:p [:input {:type "submit" :value "Create"}]]])))
+           [:form {:action "/new" :method "post"}
+            (anti-forgery-field)
+            [:input {:type "hidden" :name "p" :value p}]
+            [:p "URL:" [:br]
+             [:input {:type "text" :name "su" :value su :required "" :minlength 12 :size 50}]]
+            [:p "Title:" [:br]
+             [:input {:type "text" :name "st" :value st :size 50}]]
+            [:p [:input {:type "submit" :value "Create"}]]])))
+
+
+(defn format-date
+  "docstring"
+  ([date] (format-date date "yyyy-MM-dd"))
+  ([date format] (.format (SimpleDateFormat. format) date)))
 
 (defn bookmarks-table
   "docstring"
   [req bookmarks]
   (for [bm bookmarks]
-    [:div
-     [:p
-      [:a {:href (:bookmarks/site_url bm) :target "_blank"} (:bookmarks/site_url bm)]
-      [:br]
-      (:bookmarks/site_title bm)
-      [:br]
-      [:a {:href "#" :class "delete-bm" :data-bm-id (:bookmarks/id bm)} "delete"]]]))
+    [:div.bm-item
+     [:a {:href (:bookmarks/site_url bm) :target "_blank" :title (:bookmarks/site_url bm)} (:bookmarks/site_title bm)]
+     [:div.footer
+      [:span {:class "date"} (format-date (:bookmarks/created_at bm))]
+      " — "
+      [:a {:href (str "/bookmarks/" (:bookmarks/id bm)) :class "delete-bm" :data-bm-id (:bookmarks/id bm)} "DELETE"]]]))
 
 
 (defn index-view
   "docstring"
   [req bookmarks]
-  (let [bookmarklet-addr (bookmarklet-address (app-address req))]
-    (layout req
-            (bookmarks-table req bookmarks))))
+  (layout req
+          (bookmarks-table req bookmarks)))
