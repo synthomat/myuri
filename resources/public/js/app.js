@@ -6,7 +6,7 @@ const deleteBookmark = (id) => {
 }
 
 const deleteOnClick = (el, id) => {
-    el.addEventListener('click', function (e) {
+    el.addEventListener('click', e => {
         e.preventDefault()
 
         deleteBookmark(id).then(res => {

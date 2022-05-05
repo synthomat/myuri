@@ -11,18 +11,8 @@
 (defn bookmarklet-address
   "docstring"
   [app-address]
-  (str "javascript:window.open('" app-address "/new?site_url='+encodeURIComponent(document.location.href)+'&site_title='+document.title, '', 'width=500,height=200')"))
+  (str "javascript:window.open('" app-address "/new?p=1&su='+encodeURIComponent(document.location.href)+'&st='+document.title, '', 'width=500,height=200')"))
 
-
-(defn header
-  "docstring"
-  [req]
-  [:div
-   [:h1 "Bookmarks"]
-   [:ul
-    [:li [:a {:href "/"} "Home"]]
-    [:li [:a {:href "/new"} "New"]]
-    [:li [:a {:href (bookmarklet-address (app-address req))} "Save"]]]])
 
 (defn site
   "docstring"
@@ -37,6 +27,18 @@
       (resp/response)
       (resp/content-type "text/html")))
 
+(defn header
+  "docstring"
+  [req]
+  [:div
+   [:h1 "Bookmarks"]
+   [:ul
+    [:li [:a {:href "/"} "Home"]]
+    [:li [:a {:href "/new"} "New"]]
+    [:li [:a {:href (bookmarklet-address (app-address req))} "Save"]]]])
+
+
+
 (defn layout
   [req & children]
 
@@ -49,14 +51,17 @@
 (defn new-bookmark-view
   "docstring"
   [req]
-  (let [{:keys [site_url site_title]} (-> req :params)]
-    (site req
+  (let [{:keys [su st p]} (-> req :params)
+        frame (if p site layout)]
+
+    (frame req
       [:form {:action "/new" :method "post"}
        (anti-forgery-field)
+       [:input {:type "hidden" :name "p" :value p}]
        [:p "URL:" [:br]
-        [:input {:type "text" :name "site_url" :value site_url :required "" :minlength 12 :size 50}]]
+        [:input {:type "text" :name "su" :value su :required "" :minlength 12 :size 50}]]
        [:p "Title:" [:br]
-        [:input {:type "text" :name "site_title" :value site_title :size 50}]]
+        [:input {:type "text" :name "st" :value st :size 50}]]
        [:p [:input {:type "submit" :value "Create"}]]])))
 
 (defn bookmarks-table

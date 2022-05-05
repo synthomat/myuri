@@ -21,10 +21,14 @@
   "docstring"
   [{:keys [ds] :as req}]
   (if (is-post? req)
-    (let [{:keys [site_url site_title]} (:params req)]
-      (db/store! ds {:site_url   site_url
-                     :site_title site_title})
-      (res/redirect "/"))
+    (let [{:keys [su st p]} (:params req)]
+      (db/store! ds {:site_url   su
+                     :site_title st})
+      (if (= p "1")
+        (v/site req
+                [:h2 "You may close this popup now"]
+                [:script "window.onload = window.close"])
+        (res/redirect "/")))
     (v/new-bookmark-view req)))
 
 (defn not-found-handler
