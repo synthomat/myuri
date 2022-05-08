@@ -3,13 +3,13 @@
   (:require [org.corfield.build :as bb]))
 
 (def lib 'net.clojars.synthomat/myuri)
-(def version "0.1.0-SNAPSHOT")
+(def version "0.2")
 (def main 'myuri.core)
 
 (defn test "Run the tests." [opts]
   (bb/run-tests opts))
 
-(defn uber "Run the CI pipeline of tests (and build the uberjar)." [opts]
+(defn uber "Build the uberjar." [opts]
   (-> opts
       (assoc :lib lib :version version :main main)
       (bb/clean)

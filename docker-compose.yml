@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   app:
-    image: myuri:0.1.0
+    image: synthomat/myuri:0.2
     ports:
       - "3000:3000"
     environment:
