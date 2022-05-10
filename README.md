@@ -41,7 +41,7 @@ $ docker-compose up
 
 Or as daemonized containers (i.e. in background) 
 ```bash
-$ docker-compose -d up
+$ docker-compose up -d
 ```
 
 ## Build Docker image

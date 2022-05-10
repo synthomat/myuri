@@ -46,8 +46,6 @@
    [:h1.logo "MyUri"]
    (navigation req)])
 
-
-
 (defn layout
   [req & children]
 
@@ -91,8 +89,26 @@
       [:a {:href (str "/bookmarks/" (:bookmarks/id bm)) :class "delete-bm" :data-bm-id (:bookmarks/id bm)} "DELETE"]]]))
 
 
+
 (defn index-view
   "docstring"
   [req bookmarks]
   (layout req
           (bookmarks-table req bookmarks)))
+
+(defn backup-view
+  [req]
+  [:div
+
+   [:div
+    [:h2 "Backup"]
+    [:form {:action "/backup/export" :method "post"}
+     (anti-forgery-field)
+     [:input {:type "submit" :value "Export"}]]]
+
+   [:div {:style "margin-top: 50px"}
+    [:h2 "Restore"]
+    [:form {:action "/backup/import" :method "post"}
+     (anti-forgery-field)
+     [:input {:type "file" :name "data"}]
+     [:input {:type "submit" :value "Import"}]]]])

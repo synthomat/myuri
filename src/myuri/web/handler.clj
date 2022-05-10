@@ -4,7 +4,10 @@
             [ring.middleware.defaults :refer :all]
             [ring.middleware.reload :refer [wrap-reload]]
             [myuri.web.views :as v]
-            [myuri.db :as db]))
+            [myuri.db :as db]
+            [cheshire.core :as json])
+  (:import (java.time.format DateTimeFormatter)
+           (java.time LocalDate LocalDateTime)))
 
 (defn index-handler
   [{:keys [ds] :as req}]
@@ -49,12 +52,48 @@
       (-> (res/response "Something bad happened")
           (res/status 500)))))
 
+(defn backup-endpoint
+  "docstring"
+  [req]
+  (v/layout req
+            (v/backup-view req)))
+
+(defn bm->map
+  "docstring"
+  [db-bookmarks]
+  (map (fn [bm]
+         {:site_url (:bookmarks/site_url bm)
+          :site_title (:bookmarks/site_title bm)
+          :created_at (:bookmarks/created_at bm)})
+       db-bookmarks))
+
+(defn format-date
+  "docstring"
+  [format date]
+  (-> format
+      DateTimeFormatter/ofPattern
+      (.format date)))
+
+(defn export-endpoint
+  "docstring"
+  [{:keys [ds params] :as req}]
+  (let [data (db/bookmarks ds)
+        mapped-data (bm->map data)
+        ts (LocalDateTime/now)
+        json-data (json/encode {:time      (str ts)
+                                :bookmarks mapped-data} {:pretty true})
+        file-name (str "myuri-backup_" (format-date "yyyyMMddHHmmss" ts))]
+    (-> (res/response json-data)
+        (res/header "Content-Disposition" (str "attachment; filename=\"" file-name ".json\""))
+        (res/content-type "application/json"))))
 
 
 (def routes
   ["/" {""                          index-handler
         "new"                       new-bookmark-handler
         ["bookmarks/" [#"\d+" :id]] {:delete {"" delete-bookmark-handler}}
+        "backup"                    backup-endpoint
+        "backup/export"             {:post {"" export-endpoint}}
         true                        not-found-handler}])
 
 (defn wrap-system

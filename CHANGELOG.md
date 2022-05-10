@@ -1,6 +1,8 @@
 # Change Log
 All notable changes to this project will be documented in this file. This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
+## [0.3] – UNRELEASED
+
 ## [0.2] – 2022-05-09
 ### Added
 - Bookmarks can be added using a bookmarklet and a popup

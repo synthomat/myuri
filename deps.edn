@@ -10,7 +10,8 @@
            com.stuartsierra/component {:mvn/version "1.1.0"}
            aero/aero                  {:mvn/version "1.1.6"}
            ring/ring-defaults         {:mvn/version "0.3.3"}
-           ring/ring-devel            {:mvn/version "1.9.5"}}
+           ring/ring-devel            {:mvn/version "1.9.5"}
+           cheshire/cheshire          {:mvn/version "5.10.2"}}
 
 
  :aliases {:run-m {:main-opts ["-m" "myuri.core"]}
