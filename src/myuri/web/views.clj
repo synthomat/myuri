@@ -104,9 +104,9 @@
     [:h2 "Backup"]
     [:form {:action "/backup/export" :method "post"}
      (anti-forgery-field)
-     [:input {:type "submit" :value "Export"}]]]
+     [:input {:type "submit" :value "Download Export"}]]]
 
-   [:div {:style "margin-top: 50px"}
+   #_[:div {:style "margin-top: 50px"}
     [:h2 "Restore"]
     [:form {:action "/backup/import" :method "post"}
      (anti-forgery-field)

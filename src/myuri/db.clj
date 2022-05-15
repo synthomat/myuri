@@ -21,6 +21,9 @@
   [ds bookmark-id]
   (sql/delete! ds :bookmarks {:id bookmark-id}))
 
+
+;; Database Management --------------------------------------------------------
+
 (defn migratus-config
   "docstring"
   [ds]
