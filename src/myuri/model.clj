@@ -1,6 +1,5 @@
 (ns myuri.model
-  (:require
-    [myuri.db :as db])
+  (:require [myuri.db :as db])
   (:import (java.time LocalDateTime)
            (java.time.format DateTimeFormatter)))
 
