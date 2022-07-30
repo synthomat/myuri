@@ -1,15 +1,15 @@
 (ns myuri.web.handler
   (:require [bidi.ring :refer [make-handler]]
-            [ring.util.response :as res]
+            [cheshire.core :as json]
+            [myuri.db :as db]
+            [myuri.model :as m]
+            [myuri.web.auth.handler :as ah]
+            [myuri.web.views :as v]
             [ring.middleware.defaults :refer :all]
             [ring.middleware.reload :refer [wrap-reload]]
-            [myuri.web.views :as v]
-            [myuri.db :as db]
-            [cheshire.core :as json]
-            [myuri.model :as m])
-  (:import (java.time.format DateTimeFormatter)
-           (java.time LocalDate LocalDateTime)))
-
+            [ring.util.response :as res]
+            [ring.util.response])
+  (:import (java.time.format DateTimeFormatter)))
 
 ;; Utils ----------------------------------------------------------------------
 (defn is-post?
@@ -68,32 +68,26 @@
 (defn backup-endpoint
   "docstring"
   [req]
-  (v/layout req
-            (v/backup-view req)))
+  (v/backup-view req))
 
 (defn send-json-file
-  "docstring"
+  "Makes the browser download the provided file"
   [data file-name]
   (-> (res/response data)
       (res/header "Content-Disposition" (format "attachment; filename=\"%s\"" file-name))
       (res/content-type "application/json")))
 
-(defn export-endpoint
+(defn export-handler
   "docstring"
   [{:keys [ds params] :as req}]
 
   (let [export-data (m/export-bookmarks ds)
         ts (:time export-data)
         file-name (format "myuri-export_%s.json" (format-date "yyMMddHHmm" ts))
-        json-data (-> (assoc export-data :time (format-date "yyyy-MM-dd HH:mm:ss" ts))
+        json-data (-> export-data
+                      (assoc :time (format-date "yyyy-MM-dd HH:mm:ss" ts))
                       (json/encode {:pretty true}))]
     (send-json-file json-data file-name)))
-
-(defn import-endpoint
-  "docstring"
-  [{:keys [ds params] :as req}]
-
-  )
 
 ;; Routes and Middlewares -----------------------------------------------------
 (def routes
@@ -101,7 +95,8 @@
         "new"                       new-bookmark-handler
         ["bookmarks/" [#"\d+" :id]] {:delete {"" delete-bookmark-handler}}
         "backup"                    backup-endpoint
-        "backup/export"             {:post {"" export-endpoint}}
+        "backup/export"             {:post {"" export-handler}}
+        "auth/login"                ah/login-handler
         true                        not-found-handler}])
 
 (defn wrap-system

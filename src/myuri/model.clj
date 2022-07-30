@@ -1,7 +1,6 @@
 (ns myuri.model
   (:require [myuri.db :as db])
-  (:import (java.time LocalDateTime)
-           (java.time.format DateTimeFormatter)))
+  (:import (java.time LocalDateTime)))
 
 
 ;; Manage Bookmarks -----------------------------------------------------------

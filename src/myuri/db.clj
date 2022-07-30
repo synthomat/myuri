@@ -2,7 +2,8 @@
   (:require [next.jdbc :as jdbc]
             [next.jdbc.sql :as sql]
             [com.stuartsierra.component :as component]
-            [migratus.core :as migratus]))
+            [migratus.core :as migratus]
+            [clojure.tools.logging :as log]))
 
 
 (defn bookmarks
@@ -19,6 +20,7 @@
 (defn delete!
   "docstring"
   [ds bookmark-id]
+  (log/debug "Deleting bookmark " bookmark-id)
   (sql/delete! ds :bookmarks {:id bookmark-id}))
 
 
@@ -35,14 +37,13 @@
   component/Lifecycle
 
   (start [this]
-    (println ";; Starting DatabaseComponent")
+    (log/info "Starting DatabaseComponent")
     (let [{:keys [url]} options
           db-spec {:jdbcUrl url}
           ds (jdbc/get-datasource db-spec)
           migratus-conf (migratus-config ds)]
 
       (migratus/migrate migratus-conf)
-
       (assoc this :ds ds
                   :migratus migratus-conf)))
 

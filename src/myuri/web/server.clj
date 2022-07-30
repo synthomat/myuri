@@ -1,13 +1,14 @@
 (ns myuri.web.server
   (:require [com.stuartsierra.component :as component]
             [ring.adapter.jetty :as j]
-            [myuri.web.handler :as handler]))
+            [myuri.web.handler :as handler]
+            [clojure.tools.logging :as log]))
 
 (defrecord ServerComponent [options db]
   component/Lifecycle
 
   (start [this]
-    (println ";; Starting ServerComponent")
+    (log/info "Starting ServerComponent")
     (let [{:keys [port]} options
           handler (handler/new-handler {:ds (:ds db)})
           server (j/run-jetty handler {:port port :join? false})]
