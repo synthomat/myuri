@@ -97,6 +97,7 @@
         "backup"                    backup-endpoint
         "backup/export"             {:post {"" export-handler}}
         "auth/login"                ah/login-handler
+        "auth/register"             ah/register-handler
         true                        not-found-handler}])
 
 (defn wrap-system

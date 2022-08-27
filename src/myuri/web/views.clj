@@ -19,10 +19,18 @@
   "Base page skeleton"
   [req & children]
   (-> (hp/html5
+
         [:head
-         (hp/include-js "/js/app.js")
-         (hp/include-css "https://unpkg.com/turretcss/dist/turretcss.min.css")
+         [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
+         [:link {:rel "stylesheet" :href "https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"}]
+         (comment
+           (hp/include-css "https://cdn.jsdelivr.net/npm/uikit@3.15.5/dist/css/uikit.min.css")
+           (hp/include-js "https://cdn.jsdelivr.net/npm/uikit@3.15.5/dist/js/uikit.min.js")
+           (hp/include-js "https://cdn.jsdelivr.net/npm/uikit@3.15.5/dist/js/uikit-icons.min.js"))
          (hp/include-css "/css/app.css")
+         (hp/include-js "/js/app.js")
+
+         [:title "Myuri"]
          [:script (str "const csrfToken = '" (:anti-forgery-token req) "';")]]
         [:body
          children])
@@ -32,20 +40,27 @@
 (defn navigation
   "Navigation component"
   [req]
-  [:nav.nav-inline
-   [:ul
-    [:li [:a {:href "/"} "Home"]]
-    [:li [:a {:href "/new"} "New"]]
-    [:li [:a {:href "/backup"} "Backup"]]
-    [:li " – Bookmarklet: ["
-     [:a {:href (bookmarklet-address (app-address req))} "Save"]
-     "]"]]])
+  [:nav.navbar {:role "navigation" :aria-label "main navigation" :style "border-bottom: #eaeaea 1px solid;"}
+   [:div.navbar-brand
+    [:a.navbar-item {:href "#" :style "font-size: 1.4em; font-weight: bold;"} "myuri" [:span {:style "color: red"} "*"]]]
+   [:div#navbarBasicExample.navbar-menu
+    [:div.navbar-start
+     [:a.navbar-item {:href "/"} "Home"]]
+    [:div.navbar-end
+     [:div.navbar-item.has-dropdown.is-hoverable
+      [:a.navbar-link "Me"]
+      [:div.navbar-dropdown.is-right
+       [:a.navbar-item "Account"]
+       [:hr.navbar-divider]
+       [:a.navbar-item "Settings"]
+       [:hr.navbar-divider]
+       [:a.navbar-item "Log out"]]]]]])
 
 (defn header
   "docstring"
   [req]
-  [:div.page-header
-   [:h1.logo "myuri" [:span {:style "color: red"} "*"]]
+  [:div
+
    (navigation req)])
 
 (defn layout
@@ -54,8 +69,7 @@
 
   (site req
         (header req)
-
-        [:div.container
+        [:div.uk-container.uk-container-expand
          children]))
 
 (defn new-bookmark-view
@@ -65,14 +79,23 @@
         frame (if p site layout)]
 
     (frame req
-           [:form {:action "/new" :method "post"}
-            (anti-forgery-field)
-            [:input {:type "hidden" :name "p" :value p}]
-            [:p "URL:" [:br]
-             [:input {:type "text" :name "su" :value su :required true :minlength 12 :size 50}]]
-            [:p "Title:" [:br]
-             [:input {:type "text" :name "st" :value st :size 50}]]
-            [:p [:input {:type "submit" :value "Create"}]]])))
+           [:div {:style "padding: 10px"}
+            [:form {:action "/new" :method "post"}
+             (anti-forgery-field)
+             [:input {:type "hidden" :name "p" :value p}]
+
+             [:div.field
+              [:label.label "URL"]
+              [:div.control
+               [:input.input {:type "text" :name "su" :value su :required true}]]]
+
+             [:div.field
+              [:label.label "Title"]
+              [:div.control
+               [:input.input {:type "text" :name "st" :value st}]]]
+             [:div.field
+              [:div.control
+               [:input.button.is-link {:type "submit" :value "save bookmark"}]]]]])))
 
 
 (defn format-date
@@ -86,20 +109,36 @@
   (for [bm bookmarks]
     [:div.bm-item
      [:a {:href (:bookmarks/site_url bm) :target "_blank" :title (:bookmarks/site_url bm)} (:bookmarks/site_title bm)]
-     [:div.footer
+     [:div.bm-footer
       [:span {:class "date"} (format-date (:bookmarks/created_at bm))]
       " — "
       ;[:a {:href (format "/bookmarks/%d/edit" (:bookmarks/id bm)) :class "edit-bm" :data-bm-id (:bookmarks/id bm)} "EDIT"]
       ; " | "
-      [:a {:href (format "/bookmarks/%d" (:bookmarks/id bm)) :class "delete-bm" :data-bm-id (:bookmarks/id bm)} "DEL"]]]))
+      [:a {:href (format "/bookmarks/%d" (:bookmarks/id bm)) :class "delete-bm" :data-bm-id (:bookmarks/id bm)} "delete"]]]))
 
+
+(defn pagination
+  "docstring"
+  [req]
+  [:ul.uk-pagination.uk-flex-center {:uk-margin "true"}
+   [:li [:a {:href "#"} [:span {:uk-pagination-previous "true"}]]]
+   [:li [:a {:href "#"} "1"]]
+   [:li.uk-disabled [:span "…"]]
+   [:li [:a {:href "#"} "5"]]
+   [:li [:a {:href "#"} "6"]]
+   [:li.uk-active [:span "7"]]
+   [:li [:a {:href "#"} "8"]]
+   [:li [:a {:href "#"} [:span {:uk-pagination-next "true"}]]]])
 
 (defn index-view
   "docstring"
   [req bookmarks]
   (layout req
-          [:h1 "Bookmarks"]
-          (bookmarks-table req bookmarks)))
+          [:div.container {:style "margin-top: 20px;"}
+           [:h3.title.is-3 "Bookmarks"]
+           (bookmarks-table req bookmarks)]
+
+          #_(pagination req)))
 
 (defn backup-view
   [req]
