@@ -1,37 +1,56 @@
 (ns myuri.web.auth.handler
   (:require [myuri.web.views :as v]
-            [ring.util.anti-forgery :refer [anti-forgery-field]]))
+            [myuri.web.auth.views :as av]
+            [myuri.model :as model]
+            [malli.core :as malli]
+            [malli.error :as me]
+            [buddy.hashers :as hashers]
+            [ring.util.response :as resp]
+            [ring.util.response :as res]))
 
 
 (defn login-handler
   "docstring"
-  [req]
-  (v/layout req
-            [:h1 "Login"]))
+  [{:keys [ds] :as req}]
+  (if-not (= (:request-method req) :post)
+    (av/login-view req)
+    (let [{:keys [username password]} (:params req)]
+      (if-let [user (model/get-account ds username)]
+        (if (hashers/verify password (:users/password_digest user))
+          (-> (resp/redirect "/")
+              (assoc :session {:identity {:id       (:users/id user)
+                                          :username (:users/username user)
+                                          :email (:users/email user)}})))))))
+
+(defn logout
+  "docstring"
+  [{session :session}]
+  (-> (resp/redirect "/auth/login")                           ; Redirect to login
+      (assoc :session (dissoc session :identity))))
+
+(def User-Registration
+  (malli/schema [:map
+                 [:username [:fn {:error/message "username must consist of lowercase a-z, 0-9, '-', '_' and should be 3-20 characters long"}
+                             (partial re-matches #"^[a-z0-9\-_]{3,20}$")]]
+                 [:email [:fn {:error/message "please provide a valid email address"}
+                          (partial re-matches #"^.+@.{2,}\..{2,}$")]]
+                 [:password [:string {:min 10}]]]))
+
 
 (defn register-handler
   "docstring"
-  [req]
-  (v/layout req
-            [:div.container
-             [:h3.title.is-3 "Register"]
-             [:form {:action "/auth/register" :method "post"}
-              (anti-forgery-field)
-              [:div.field
-               [:label.label "Username"]
-               [:div.control
-                [:input.input {:type "text" :name "username"}]]]
-              [:div.field
-               [:label.label "Email"]
-               [:div.control
-                [:input.input {:type "email" :name "email"}]]]
+  [{:keys [ds] :as req}]
 
-              [:div.field
-               [:label.label "Password"]
-               [:div.control
-                [:input.input {:type "password" :name "password"}]]]
+  (if-not (= (:request-method req) :post)
+    (av/register-view req)
+    (let [params (-> req :params)
+          user (-> params
+                   (select-keys [:username :email :password]))]
+      (if-let [errors (-> User-Registration
+                          (malli/explain user)
+                          (me/humanize))]
+        (av/register-view (assoc req :validation/errors errors))
+        (do
+          (model/create-user ds nil user)
+          (resp/redirect "/auth/login"))))))
 
-              [:div.field
-               [:div.control
-                [:input.button.is-link {:type "submit" :value "register"}]
-                " or " [:a {:href "/auth/login"} "log in"]]]]]))

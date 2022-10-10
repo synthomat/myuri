@@ -8,9 +8,10 @@
 
 (defn bookmarks
   "docstring"
-  [ds]
+  [ds user-id]
   (sql/query ds ["select * from bookmarks
-                 order by created_at desc"]))
+                  where user_id = ?
+                 order by created_at desc" user-id]))
 
 (defn store!
   "docstring"
@@ -19,9 +20,9 @@
 
 (defn delete!
   "docstring"
-  [ds bookmark-id]
-  (log/debug "Deleting bookmark " bookmark-id)
-  (sql/delete! ds :bookmarks {:id bookmark-id}))
+  [ds user-id bookmark-id]
+  (log/debug "Deleting bookmark " user-id bookmark-id)
+  (sql/delete! ds :bookmarks {:id bookmark-id :user_id user-id}))
 
 
 ;; Database Management --------------------------------------------------------
