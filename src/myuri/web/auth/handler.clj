@@ -9,18 +9,26 @@
             [ring.util.response :as res]))
 
 
+(defn check-user-password
+  "docstring"
+  [ds username password]
+  (when-let [user (model/get-account ds username)]
+    (when (hashers/verify password (:users/password_digest user))
+      user)))
+
+
 (defn login-handler
   "docstring"
   [{:keys [ds] :as req}]
   (if-not (= (:request-method req) :post)
     (av/login-view req)
     (let [{:keys [username password]} (:params req)]
-      (if-let [user (model/get-account ds username)]
-        (if (hashers/verify password (:users/password_digest user))
-          (-> (resp/redirect "/")
-              (assoc :session {:identity {:id       (:users/id user)
-                                          :username (:users/username user)
-                                          :email (:users/email user)}})))))))
+      (if-let [user (check-user-password ds username password)]
+        (-> (resp/redirect "/")
+            (assoc :session {:identity {:id       (:users/id user)
+                                        :username (:users/username user)
+                                        :email (:users/email user)}}))
+        (av/login-view req true)))))
 
 (defn logout
   "docstring"
