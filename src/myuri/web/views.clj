@@ -48,10 +48,12 @@
          [:a.navbar-item {:href "/"} "Home"]]
 
         [:div.navbar-end
+         [:div.navbar-item
+          [:div.buttons
+           [:a.button {:href (bookmarklet-address (app-address req))} "Bookmarklet"]]]
          [:div.navbar-item.has-dropdown.is-hoverable
           [:a.navbar-link (-> req :identity :username)]
           [:div.navbar-dropdown.is-right
-
            [:a.navbar-item {:href "/auth/logout"} "Log out"]]]])
 
       [:div.navbar-end
