@@ -50,7 +50,7 @@
         [:div.navbar-end
          [:div.navbar-item
           [:div.buttons
-           [:a.button {:href (bookmarklet-address (app-address req))} "Bookmarklet"]]]
+           [:a.button.is-small {:href (bookmarklet-address (app-address req))} "Bookmarklet"]]]
          [:div.navbar-item.has-dropdown.is-hoverable
           [:a.navbar-link (-> req :identity :username)]
           [:div.navbar-dropdown.is-right
