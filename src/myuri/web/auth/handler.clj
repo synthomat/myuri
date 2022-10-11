@@ -1,12 +1,11 @@
 (ns myuri.web.auth.handler
-  (:require [myuri.web.views :as v]
-            [myuri.web.auth.views :as av]
-            [myuri.model :as model]
+  (:require [buddy.hashers :as hashers]
             [malli.core :as malli]
             [malli.error :as me]
-            [buddy.hashers :as hashers]
+            [myuri.model :as model]
+            [myuri.web.auth.views :as av]
             [ring.util.response :as resp]
-            [ring.util.response :as res]))
+            [ring.util.response]))
 
 
 (defn check-user-password
@@ -27,13 +26,13 @@
         (-> (resp/redirect "/")
             (assoc :session {:identity {:id       (:users/id user)
                                         :username (:users/username user)
-                                        :email (:users/email user)}}))
+                                        :email    (:users/email user)}}))
         (av/login-view req true)))))
 
 (defn logout
   "docstring"
   [{session :session}]
-  (-> (resp/redirect "/auth/login")                           ; Redirect to login
+  (-> (resp/redirect "/auth/login")                         ; Redirect to login
       (assoc :session (dissoc session :identity))))
 
 (def User-Registration

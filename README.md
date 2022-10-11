@@ -26,10 +26,12 @@ Run that uberjar:
 $ DATABASE_URL=jdbc:postgresql://localhost/myuri java -jar target/myuri-0.2.jar
 ```
 
-| Environment  | Default | Example                           | Explanation                |
-|--------------|---------|-----------------------------------|----------------------------|
-| PORT         | 3000    | 3000                              | Web App HTTP Port          |
-| DATABASE_URL | –       | jdbc:postgresql://localhost/myuri | Database connection string |
+| Environment  | Default | Example                           | Explanation                                                                                             |
+|--------------|--------|-----------------------------------|---------------------------------------------------------------------------------------------------------|
+| DATABASE_URL | –      | jdbc:postgresql://localhost/myuri | Database connection string                                                                              |
+| COOKIE_SECRET | JS9D2GG6ytgOLx06       | PAWXt2maWB8bpBCR | 16-bytes encryption key for the Cookie Session store. **This is critical** – please change the default! |
+| PORT         | 3000   | 3000                              | Web App HTTP Port                                                                                       |
+
 
 
 

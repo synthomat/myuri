@@ -2,13 +2,10 @@
   (:require [ring.util.anti-forgery :refer [anti-forgery-field]]
             [myuri.web.views :as v]))
 
-
-
-
 (defn login-view
   "docstring"
   [req & [err]]
-  (let [{:keys [username email]} (-> req :params)]
+  (let [{:keys [username]} (-> req :params)]
     (v/layout req
               [:div.container
                [:h3.title.is-3 "Log in"]
@@ -32,28 +29,10 @@
                   [:input.button.is-link {:type "submit" :value "login"}]
                   " or " [:a {:href "/auth/register"} "register"]]]]])))
 
-(defn magic-link-view
-  "docstring"
-  [req]
-  (let [{:keys [username email]} (-> req :params)]
-    (v/layout req
-              [:div.container
-               [:h3.title.is-3 "Log in"]
-               [:form {:action "/auth/magic-link" :method "post"}
-                (anti-forgery-field)
-                [:div.field
-                 [:label.label "Email"]
-                 [:div.control
-                  [:input.input {:type "email" :name "email" :required true :value username}]]]
-
-                [:div.field
-                 [:div.control
-                  [:input.button.is-link {:type "submit" :value "login"}]]]]])))
-
 (defn register-view
   "docstring"
   [req]
-  (let [{:keys [username email password]} (-> req :params)]
+  (let [{:keys [username email]} (-> req :params)]
     (let [errs (:validation/errors req)]
       (v/layout req
                 [:div.container

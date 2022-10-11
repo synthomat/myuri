@@ -9,8 +9,9 @@
 
   (start [this]
     (log/info "Starting ServerComponent")
-    (let [{:keys [port]} options
-          handler (handler/new-handler {:ds (:ds db)})
+    (let [{:keys [cookie-secret port]} options
+          handler (handler/new-handler {:ds (:ds db)
+                                        :cookie-secret cookie-secret})
           server (j/run-jetty handler {:port port :join? false})]
       (assoc this :server server)))
 

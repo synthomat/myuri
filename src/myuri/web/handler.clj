@@ -88,7 +88,7 @@
 
 (defn export-handler
   "docstring"
-  [{:keys [ds params] :as req}]
+  [{:keys [ds] :as req}]
 
   (let [export-data (m/export-bookmarks ds (user-id req))
         ts (:time export-data)
@@ -121,7 +121,7 @@
 
 (defn unauthorized-handler
   "docstring"
-  [req metadata]
+  [req _]
   (resp/redirect (str "/auth/login?next=" (:uri req))))
 
 (def backend (backends/session {:unauthorized-handler unauthorized-handler}))
@@ -146,7 +146,7 @@
       (wrap-system opts)
       (wrap-defaults (-> site-defaults
                          (assoc-in [:session :store] (cookie-store
-                                                       {:key "agtjrfokft5rs95g"}))
+                                                       {:key (:cookie-secret opts)}))
                          (assoc-in [:session :cookie-attrs :same-site] :lax)))
       (wrap-cors :access-control-allow-origin #".*"
                  :access-control-allow-methods [:get :put :post :delete])
