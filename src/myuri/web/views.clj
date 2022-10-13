@@ -108,12 +108,21 @@
   ([date] (format-date date "yyyy-MM-dd"))
   ([date format] (.format (SimpleDateFormat. format) date)))
 
+(defn domain-from-url
+  "docstring"
+  [url]
+  (let [purl (clojure.java.io/as-url url)]
+    (str (.getProtocol purl) "://" (.getHost purl))))
+
 (defn bookmarks-table
   "docstring"
   [req bookmarks]
   (for [bm bookmarks]
     [:div.bm-item
-     [:a {:href (:bookmarks/site_url bm) :target "_blank" :title (:bookmarks/site_url bm)} (:bookmarks/site_title bm)]
+     [:a {:href (:bookmarks/site_url bm) :target "_blank" :title (:bookmarks/site_url bm)}
+      [:div (:bookmarks/site_title bm)]
+      [:div {:style "margin: -4px 0 2px 0; font-size: 12px; color: #889"} (domain-from-url (:bookmarks/site_url bm))]]
+
      [:div.bm-footer
       [:span {:class "date"} (format-date (:bookmarks/created_at bm))]
       " — "
