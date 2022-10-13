@@ -7,3 +7,8 @@
 
 (defn parse-int [s]
   (Integer. (re-find #"[0-9]*" s)))
+
+(defn is-post?
+  "docstring"
+  [req]
+  (= (-> req :request-method) :post))

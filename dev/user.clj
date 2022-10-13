@@ -8,7 +8,7 @@
 (def system nil)
 
 (defn init []
-  (let [config (read-config (clojure.java.io/resource "config.edn"))]
+  (let [config (read-config (clojure.java.io/resource "config.defaults.edn"))]
     (alter-var-root #'system
                     (constantly (system/new-system config)))))
 

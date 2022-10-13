@@ -5,7 +5,8 @@
             [myuri.model :as model]
             [myuri.web.auth.views :as av]
             [ring.util.response :as resp]
-            [ring.util.response]))
+            [ring.util.response]
+            [myuri.web.utils :refer [is-post?]]))
 
 
 (defn check-user-password
@@ -19,7 +20,7 @@
 (defn login-handler
   "docstring"
   [{:keys [ds] :as req}]
-  (if-not (= (:request-method req) :post)
+  (if-not (is-post? req)
     (av/login-view req)
     (let [{:keys [username password]} (:params req)]
       (if-let [user (check-user-password ds username password)]
@@ -48,7 +49,7 @@
   "docstring"
   [{:keys [ds] :as req}]
 
-  (if-not (= (:request-method req) :post)
+  (if-not (is-post? req)
     (av/register-view req)
     (let [params (-> req :params)
           user (-> params
@@ -61,3 +62,7 @@
           (model/create-user ds nil user)
           (resp/redirect "/auth/login"))))))
 
+(defn unauthorized-handler
+  "docstring"
+  [req _]
+  (resp/redirect (str "/auth/login")))

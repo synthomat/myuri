@@ -1,9 +1,17 @@
-# synthomat/myuri
-MyUri is a simple bookmark manager.
+# Myuri
+Myuri is a simple bookmark manager.
 
-It allows adding bookmarks using a convenient bookmarklet.
+It allows bookmarking websites using a convenient bookmarklet.
 
 ![Version 0.2](doc/screenshots/myuri_0.2.jpeg)
+
+## Kick Start with Docker-Compose
+The most convenient way of starting the software is by using docker-compose
+```bash
+$ curl -OJ https://raw.githubusercontent.com/synthomat/myuri/main/docker-compose.yml
+$ docker-compose up
+```
+Then open browser at http://localhost:3000/
 
 ## Installation
 ### Prerequisites
@@ -23,14 +31,14 @@ This will produce a self contained uberjar in the `target/` directory.
 
 Run that uberjar:
 ```bash
-$ DATABASE_URL=jdbc:postgresql://localhost/myuri java -jar target/myuri-0.2.jar
+$ DATABASE_URL=jdbc:postgresql://localhost/myuri java -jar target/myuri-0.3.jar
 ```
 
-| Environment  | Default | Example                           | Explanation                                                                                             |
-|--------------|--------|-----------------------------------|---------------------------------------------------------------------------------------------------------|
-| DATABASE_URL | –      | jdbc:postgresql://localhost/myuri | Database connection string                                                                              |
-| COOKIE_SECRET | JS9D2GG6ytgOLx06       | PAWXt2maWB8bpBCR | 16-bytes encryption key for the Cookie Session store. **This is critical** – please change the default! |
-| PORT         | 3000   | 3000                              | Web App HTTP Port                                                                                       |
+| Environment   | Default          | Example                           | Explanation                                                                                             |
+|---------------|------------------|-----------------------------------|---------------------------------------------------------------------------------------------------------|
+| DATABASE_URL  | –                | jdbc:postgresql://localhost/myuri | Database connection string                                                                              |
+| COOKIE_SECRET | JS9D2GG6ytgOLx06 | PAWXt2maWB8bpBCR                  | 16-bytes encryption key for the Cookie Session store. **This is critical** – please change the default! |
+| PORT          | 3000             | 3000                              | Web App HTTP Port                                                                                       |
 
 
 
@@ -48,7 +56,7 @@ $ docker-compose up -d
 
 ## Build Docker image
 ```bash
-$ docker build -t myuri:0.2 .
+$ docker build -t myuri:0.3 .
 ```
 
 ## Dev environment

@@ -141,7 +141,7 @@
   [req bookmarks]
   (layout req
           [:div.container {:style "margin-top: 20px;"}
-           [:h3.title.is-3 "Bookmarks"]
+           [:h3.is-size-3 "Bookmarks"]
            (bookmarks-table req bookmarks)]
 
           #_(pagination req)))

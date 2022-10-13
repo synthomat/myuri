@@ -5,32 +5,27 @@
             [myuri.model :as m]
             [myuri.web.auth.handler :as ah]
             [myuri.web.views :as v]
-            [ring.middleware.defaults :refer :all]
+            [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.util.response :as res]
-            [ring.util.response]
             [buddy.auth.backends :as backends]
             [buddy.auth :refer [authenticated?]]
             [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
             [buddy.auth.accessrules :refer [wrap-access-rules]]
             [ring.middleware.session.cookie :refer [cookie-store]]
-            [ring.util.response :as resp]
-            [myuri.web.utils :refer [user-id]]
-            [ring.middleware.cors :refer [wrap-cors]])
+            [myuri.web.utils :refer [user-id is-post?]]
+            [ring.middleware.cors :refer [wrap-cors]]
+            [myuri.web.auth.handler :refer [unauthorized-handler]])
   (:import (java.time.format DateTimeFormatter)))
 
-(use 'clojure.pprint)
-
 ;; Utils ----------------------------------------------------------------------
-(defn is-post?
-  "docstring"
-  [req]
-  (= (-> req :request-method) :post))
 
 (defn not-found-handler
   "docstring"
   [req]
-  (-> (v/layout req [:h2 {:style "color: red"} "Page not found"])
+  (-> (v/layout req
+                [:div.container {:style "margin-top: 20px;"}
+                 [:h3.is-size-3 {:style "color: red"} "Page not found"]])
       (res/status 404)))
 
 
@@ -119,35 +114,39 @@
         (assoc :ds (:ds opts))
         (handler))))
 
-(defn unauthorized-handler
-  "docstring"
-  [req _]
-  (resp/redirect (str "/auth/login?next=" (:uri req))))
 
-(def backend (backends/session {:unauthorized-handler unauthorized-handler}))
+(def authn-backend (backends/session {:unauthorized-handler unauthorized-handler}))
 
-(def rules [{:pattern #"^/auth/.*"
-             :handler (constantly true)}
-            {:pattern #"^/.*"
-             :handler authenticated?}])
+
+(def authz-rules [{:pattern #"^/auth/.*"
+                   :handler (constantly true)}
+                  {:pattern #"^/.*"
+                   :handler authenticated?}])
 
 (defn wrap-auth
   "docstring"
-  [handler]
+  [handler backend rules]
   (-> handler
       (wrap-access-rules {:rules rules})
       (wrap-authentication backend)
       (wrap-authorization backend)))
 
+(defn wrap-site-defaults
+  "docstring"
+  [handler opts]
+  (let [cookie-stor (cookie-store {:key (:cookie-secret opts)})
+        defaults (-> site-defaults
+                     (assoc-in [:session :store] cookie-stor)
+                     (assoc-in [:session :cookie-attrs :same-site] :lax))]
+    (wrap-defaults handler defaults)))
+
+
 (defn new-handler
   [opts]
   (-> (make-handler routes)
-      (wrap-auth)
+      (wrap-auth authn-backend authz-rules)
       (wrap-system opts)
-      (wrap-defaults (-> site-defaults
-                         (assoc-in [:session :store] (cookie-store
-                                                       {:key (:cookie-secret opts)}))
-                         (assoc-in [:session :cookie-attrs :same-site] :lax)))
+      (wrap-site-defaults opts)
       (wrap-cors :access-control-allow-origin #".*"
                  :access-control-allow-methods [:get :put :post :delete])
       (wrap-reload)))
