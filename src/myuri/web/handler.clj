@@ -57,7 +57,7 @@
   [{:keys [ds params] :as req}]
   (let [bookmark-id (-> params :id parse-uuid)]
     (if (db/delete! ds (user-id req) bookmark-id)
-      (res/status 204)
+      (res/status 200)
       (-> (res/response "Something bad happened")
           (res/status 500)))))
 
@@ -102,7 +102,7 @@
         "backup"           {""    backup-endpoint
                             :post {"/export" export-handler}}
         "auth/"            {"login"    ah/login-handler
-                            "logout"   ah/logout
+                            :post      {"logout" ah/logout}
                             "register" ah/register-handler}
         true               not-found-handler}])
 
@@ -117,11 +117,8 @@
 
 (def authn-backend (backends/session {:unauthorized-handler unauthorized-handler}))
 
-
-(def authz-rules [{:pattern #"^/auth/.*"
-                   :handler (constantly true)}
-                  {:pattern #"^/.*"
-                   :handler authenticated?}])
+(def authz-rules [{:pattern #"^/auth/.*" :handler (constantly true)}
+                  {:pattern #"^/.*" :handler authenticated?}])
 
 (defn wrap-auth
   "docstring"
@@ -147,6 +144,6 @@
       (wrap-auth authn-backend authz-rules)
       (wrap-system opts)
       (wrap-site-defaults opts)
-      (wrap-cors :access-control-allow-origin #".*"
+      #_(wrap-cors :access-control-allow-origin #".*"
                  :access-control-allow-methods [:get :put :post :delete])
       (wrap-reload)))

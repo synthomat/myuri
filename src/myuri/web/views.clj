@@ -2,13 +2,10 @@
   (:require [hiccup.page :as hp]
             [ring.util.anti-forgery :refer [anti-forgery-field]]
             [ring.util.response :as resp]
-            [buddy.auth :refer [authenticated?]])
+            [buddy.auth :refer [authenticated?]]
+            [myuri.web.utils :as u])
   (:import (java.text SimpleDateFormat)))
 
-(defn app-address
-  "docstring"
-  [req]
-  (str (-> req :scheme name) "://" (:server-name req) ":" (:server-port req)))
 
 (defn bookmarklet-address
   "docstring"
@@ -25,6 +22,7 @@
          [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
          [:link {:rel "stylesheet" :href "https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"}]
          (hp/include-css "/css/app.css")
+         (hp/include-js "https://unpkg.com/htmx.org@1.8.2")
          (hp/include-js "/js/app.js")
 
          [:title "Myuri"]
@@ -50,11 +48,11 @@
         [:div.navbar-end
          [:div.navbar-item
           [:div.buttons
-           [:a.button.is-small {:href (bookmarklet-address (app-address req))} "Bookmarklet"]]]
+           [:a.button.is-small {:href (bookmarklet-address (u/app-address req))} "Bookmarklet"]]]
          [:div.navbar-item.has-dropdown.is-hoverable
           [:a.navbar-link (-> req :identity :username)]
           [:div.navbar-dropdown.is-right
-           [:a.navbar-item {:href "/auth/logout"} "Log out"]]]])
+           [:a.navbar-item {:href "/" :hx-post "/auth/logout" :hx-target "body"} "Log out"]]]])
 
       [:div.navbar-end
        [:div.navbar-item
@@ -129,7 +127,7 @@
       ;[:a {:href (format "/bookmarks/%d/edit" (:bookmarks/id bm)) :class "edit-bm" :data-bm-id (:bookmarks/id bm)} "EDIT"]
       ; " | "
 
-      [:a {:href (format "/bookmarks/%s" (-> bm :bookmarks/id str)) :class "delete-bm" :data-bm-id (-> bm :bookmarks/id str)} "delete"]]]))
+      [:a {:href (format "/bookmarks/%s" (-> bm :bookmarks/id str)) :hx-target "closest div.bm-item" :hx-swap "delete" :hx-delete (format "/bookmarks/%s" (-> bm :bookmarks/id str))} "delete"]]]))
 
 
 (defn pagination

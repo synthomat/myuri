@@ -1,9 +1,9 @@
 (ns myuri.core
+  (:gen-class)
   (:require [com.stuartsierra.component :as comp]
             [myuri.system :as system]
             [aero.core :as aero]
-            [clojure.tools.logging :as log])
-  (:gen-class))
+            [clojure.tools.logging :as log]))
 
 (defn -main
   [& args]

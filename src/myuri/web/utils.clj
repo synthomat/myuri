@@ -12,3 +12,8 @@
   "docstring"
   [req]
   (= (-> req :request-method) :post))
+
+(defn app-address
+  "docstring"
+  [req]
+  (str (-> req :scheme name) "://" (:server-name req) ":" (:server-port req)))
