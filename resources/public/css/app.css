@@ -17,3 +17,8 @@ div.bm-item div.footer a {
 .uk-navbar-item, .uk-navbar-nav>li>a {
     min-height: 60px;
 }
+
+.site-icon {
+    width: 18px;
+    margin-right: 5px;
+}

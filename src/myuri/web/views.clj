@@ -108,9 +108,13 @@
 
 (defn domain-from-url
   "docstring"
-  [url]
-  (let [purl (clojure.java.io/as-url url)]
-    (str (.getProtocol purl) "://" (.getHost purl))))
+
+  ([url protocol]
+   (let [purl (clojure.java.io/as-url url)
+         port (when (not= (.getPort purl) -1) (str ":" (.getPort purl)))]
+     (str (when protocol (str (.getProtocol purl) "://")) (.getHost purl) port)))
+  ([url]
+   (domain-from-url url false)))
 
 (defn bookmarks-table
   "docstring"
@@ -118,7 +122,7 @@
   (for [bm bookmarks]
     [:div.bm-item
      [:a {:href (:bookmarks/site_url bm) :target "_blank" :title (:bookmarks/site_url bm)}
-      [:div (:bookmarks/site_title bm)]
+      [:div [:img.site-icon {:src (str (domain-from-url (:bookmarks/site_url bm) true) "/favicon.ico")}] (:bookmarks/site_title bm)]
       [:div {:style "margin: -4px 0 2px 0; font-size: 12px; color: #889"} (domain-from-url (:bookmarks/site_url bm))]]
 
      [:div.bm-footer
