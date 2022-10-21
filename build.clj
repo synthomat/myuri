@@ -7,10 +7,10 @@
 (def main 'myuri.core)
 
 (defn test "Run the tests." [opts]
-  (bb/run-tests opts))
+      (bb/run-tests opts))
 
 (defn uber "Build the uberjar." [opts]
-  (-> opts
-      (assoc :lib lib :version version :main main)
-      (bb/clean)
-      (bb/uber)))
+      (-> opts
+          (assoc :lib lib :version version :main main)
+          (bb/clean)
+          (bb/uber)))

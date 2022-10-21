@@ -17,3 +17,17 @@
   "docstring"
   [req]
   (str (-> req :scheme name) "://" (:server-name req) ":" (:server-port req)))
+
+(defn domain-from-url
+  "Extracts the domain from a URL.
+   If protocol is false it will remove the protocol from the url.
+   Fails with empty string if domain can't be parsed"
+
+  ([url protocol]
+   (try
+     (let [purl (clojure.java.io/as-url url)
+           port (when (not= (.getPort purl) -1) (str ":" (.getPort purl)))]
+       (str (when protocol (str (.getProtocol purl) "://")) (.getHost purl) port))
+     (catch Exception e "")))
+  ([url]
+   (domain-from-url url false)))

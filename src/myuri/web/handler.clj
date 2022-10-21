@@ -117,7 +117,7 @@
 
 (def authn-backend (backends/session {:unauthorized-handler unauthorized-handler}))
 
-(def authz-rules [{:pattern #"^/auth/.*" :handler (constantly true)}
+(def authz-rules [{:pattern #"^/auth/.*" :handler (constantly true)} ; Let everyone use the auth endpoints
                   {:pattern #"^/.*" :handler authenticated?}])
 
 (defn wrap-auth

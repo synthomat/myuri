@@ -1,6 +1,8 @@
 # Myuri
 Myuri is a simple bookmark manager.
 
+[![CI](https://github.com/synthomat/myuri/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/synthomat/myuri/actions/workflows/ci.yml)
+
 It allows bookmarking websites using a convenient bookmarklet.
 
 ![Version 0.2](doc/screenshots/myuri_0.2.jpeg)
@@ -72,6 +74,11 @@ Then you can use these commands to launch, restart or stop the running applicati
 user=> (go)     ; launches application
 user=> (reset)  ; re-starts application
 user=> (stop)   ; stops application
+```
+
+### Running tests
+```bash
+$ clj -T:build test
 ```
 
 ## License

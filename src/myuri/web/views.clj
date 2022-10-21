@@ -106,32 +106,30 @@
   ([date] (format-date date "yyyy-MM-dd"))
   ([date format] (.format (SimpleDateFormat. format) date)))
 
-(defn domain-from-url
-  "docstring"
 
-  ([url protocol]
-   (let [purl (clojure.java.io/as-url url)
-         port (when (not= (.getPort purl) -1) (str ":" (.getPort purl)))]
-     (str (when protocol (str (.getProtocol purl) "://")) (.getHost purl) port)))
-  ([url]
-   (domain-from-url url false)))
+(defn title-or-url
+  "Extracts the title from a bookmark record or falls back to url"
+  [bm]
+  (or (not-empty (:bookmarks/site_title bm))
+      (:bookmarks/site_url bm)))
 
 (defn bookmarks-table
   "docstring"
   [req bookmarks]
   (for [bm bookmarks]
-    [:div.bm-item
-     [:a {:href (:bookmarks/site_url bm) :target "_blank" :title (:bookmarks/site_url bm)}
-      [:div [:img.site-icon {:src (str (domain-from-url (:bookmarks/site_url bm) true) "/favicon.ico")}] (:bookmarks/site_title bm)]
-      [:div {:style "margin: -4px 0 2px 0; font-size: 12px; color: #889"} (domain-from-url (:bookmarks/site_url bm))]]
+    (let [title (title-or-url bm)
+          url (:bookmarks/site_url bm)]
+      [:div.bm-item
+       [:a {:href url :target "_blank" :title url}
+        [:div [:img.site-icon {:src (str (u/domain-from-url url true) "/favicon.ico")}] title]
+        [:div {:style "margin: -4px 0 2px 0; font-size: 12px; color: #889"} (u/domain-from-url url)]]
+       [:div.bm-footer
+        [:span {:class "date"} (format-date (:bookmarks/created_at bm))]
+        " — "
+        ;[:a {:href (format "/bookmarks/%d/edit" (:bookmarks/id bm)) :class "edit-bm" :data-bm-id (:bookmarks/id bm)} "EDIT"]
+        ; " | "
 
-     [:div.bm-footer
-      [:span {:class "date"} (format-date (:bookmarks/created_at bm))]
-      " — "
-      ;[:a {:href (format "/bookmarks/%d/edit" (:bookmarks/id bm)) :class "edit-bm" :data-bm-id (:bookmarks/id bm)} "EDIT"]
-      ; " | "
-
-      [:a {:href (format "/bookmarks/%s" (-> bm :bookmarks/id str)) :hx-target "closest div.bm-item" :hx-swap "delete" :hx-delete (format "/bookmarks/%s" (-> bm :bookmarks/id str))} "delete"]]]))
+        [:a {:href (format "/bookmarks/%s" (-> bm :bookmarks/id str)) :hx-target "closest div.bm-item" :hx-swap "delete" :hx-delete (format "/bookmarks/%s" (-> bm :bookmarks/id str))} "delete"]]])))
 
 
 (defn pagination
