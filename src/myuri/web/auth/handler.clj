@@ -13,8 +13,8 @@
   "docstring"
   [ds username password]
   (when-let [user (model/get-account ds username)]
-    (when (hashers/verify password (:users/password_digest user))
-      user)))
+    (when (hashers/check password (get user :users/password_digest))
+      (dissoc user :users/password_digest))))
 
 
 (defn login-handler

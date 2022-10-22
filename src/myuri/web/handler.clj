@@ -61,6 +61,21 @@
       (-> (res/response "Something bad happened")
           (res/status 500)))))
 
+(defn edit-bookmark-handler
+  "docstring"
+  [{:keys [ds params] :as req}]
+  (let [bookmark-id (-> params :id parse-uuid)
+        user-id (user-id req)]
+    (if-let [bm (m/bookmark-by-id ds user-id bookmark-id)]
+      (if (is-post? req)
+        (let [{:keys [su st]} (:params req)]
+          (m/update-bookmark ds bookmark-id {:bookmarks/site_title st
+                                             :bookmarks/site_url su})
+          (res/redirect "/"))
+        (v/edit-bookmark-view req bm))
+
+      (v/layout req "Bookmark not found"))))
+
 ;; Backups Handlers -----------------------------------------------------------
 (defn format-date
   "docstring"
@@ -98,7 +113,8 @@
 (def routes
   ["/" {""                 index-handler
         "new"              new-bookmark-handler
-        ["bookmarks/" :id] {:delete {"" delete-bookmark-handler}}
+        ["bookmarks/" :id] {:delete {"" delete-bookmark-handler}
+                            "/edit" edit-bookmark-handler}
         "backup"           {""    backup-endpoint
                             :post {"/export" export-handler}}
         "auth/"            {"login"    ah/login-handler

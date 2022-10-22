@@ -12,13 +12,13 @@ create table users
 --;;
 create table bookmarks
 (
+    id         uuid                     default gen_random_uuid() not null
+        constraint bookmarks_pk
+            primary key,
     site_url   varchar(500)                                       not null,
     site_title varchar(500),
     created_at timestamp with time zone default now(),
     is_deleted boolean                  default false,
-    id         uuid                     default gen_random_uuid() not null
-        constraint bookmarks_pk
-            primary key,
     user_id    uuid
         constraint users_fk
             references users

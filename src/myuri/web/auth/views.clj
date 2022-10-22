@@ -11,7 +11,7 @@
                [:h3.title.is-3 "Log in"]
                (when err
                  [:div.notification.is-danger.is-light
-                  [:strong "Log  in failed: "] "we couldn't find such a username/password combination"])
+                  [:strong "⚠️ Login failed: "] "we couldn't find such a username/password combination"])
                [:form {:action "/auth/login" :method "post"}
                 (anti-forgery-field)
                 [:div.field

@@ -44,6 +44,17 @@
                                                    user))))
 
 ;; Manage Bookmarks -----------------------------------------------------------
+(defn bookmark-by-id
+  "docstring"
+  [ds user-id bookmark-id]
+  (-> (sql/find-by-keys ds :bookmarks {:user_id user-id
+                                       :id      bookmark-id})
+      first))
+
+(defn update-bookmark
+  "docstring"
+  [ds bookmark-id data]
+  (-> (sql/update! ds :bookmarks data {:id bookmark-id})))
 
 
 ;; Backups / Export / Import --------------------------------------------------

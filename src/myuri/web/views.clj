@@ -98,8 +98,30 @@
                [:input.input {:type "text" :name "st" :value st}]]]
              [:div.field
               [:div.control
-               [:input.button.is-link {:type "submit" :value "save bookmark"}]]]]])))
+               [:input.button.is-link {:type "submit" :value "create"}]]]]])))
 
+(defn edit-bookmark-view
+  "docstring"
+  [req bm]
+  (layout req
+          [:div.container {:style "margin-top: 20px;"}
+           [:h3.is-size-3 "Edit Bookmark"]
+           [:div {:style "padding: 10px"}
+            [:form {:action (str "/bookmarks/" (:bookmarks/id bm) "/edit")  :method "post"}
+             (anti-forgery-field)
+
+             [:div.field
+              [:label.label "URL"]
+              [:div.control
+               [:input.input {:type "text" :name "su" :value (:bookmarks/site_url bm) :required true}]]]
+
+             [:div.field
+              [:label.label "Title"]
+              [:div.control
+               [:input.input {:type "text" :name "st" :value (:bookmarks/site_title bm)}]]]
+             [:div.field
+              [:div.control
+               [:input.button.is-link {:type "submit" :value "update"}]]]]]]))
 
 (defn format-date
   "docstring"
@@ -126,9 +148,8 @@
        [:div.bm-footer
         [:span {:class "date"} (format-date (:bookmarks/created_at bm))]
         " — "
-        ;[:a {:href (format "/bookmarks/%d/edit" (:bookmarks/id bm)) :class "edit-bm" :data-bm-id (:bookmarks/id bm)} "EDIT"]
-        ; " | "
-
+        [:a {:href (format "/bookmarks/%s/edit" (-> bm :bookmarks/id str)) :class "edit-bm"} "edit"]
+        " | "
         [:a {:href (format "/bookmarks/%s" (-> bm :bookmarks/id str)) :hx-target "closest div.bm-item" :hx-swap "delete" :hx-delete (format "/bookmarks/%s" (-> bm :bookmarks/id str))} "delete"]]])))
 
 

@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to this project will be documented in this file. This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
+## [0.5] – UNRELEASED
+### Fixed
+* Username/Password check was too permissive and did not check the password correctly
+
+### Added
+* Bookmarks can be edited now!
+
 ## [0.4] – 2022-10-22
 ### Changed
 * Integrated HTMX for dynamic functions
