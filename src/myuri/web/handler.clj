@@ -74,7 +74,8 @@
           (res/redirect "/"))
         (v/edit-bookmark-view req bm))
 
-      (v/layout req "Bookmark not found"))))
+      (-> (v/layout req "Bookmark not found")
+          (res/status 404)))))
 
 ;; Backups Handlers -----------------------------------------------------------
 (defn format-date

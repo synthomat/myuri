@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file. This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
-## [0.5] – UNRELEASED
+## [0.5] – 2022-10-23
 ### Fixed
 * Username/Password check was too permissive and did not check the password correctly
 
