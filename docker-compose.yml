@@ -2,11 +2,11 @@ version: "3.9"
 
 services:
   app:
-    image: synthomat/myuri:0.4
+    image: synthomat/myuri:0.6
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: jdbc:postgresql://db/myuri?user=myuri&password=8c2677a2726089ff9782b38647ee169a7ae920b9
+      DATABASE_URL: jdbc:postgresql://db/myuri?user=myuri&password=CHANGEME_CHANGEME_PLEASE
     links:
       - db
     depends_on:
@@ -15,7 +15,7 @@ services:
     image: postgres:14.2
     environment:
       POSTGRES_USER: myuri
-      POSTGRES_PASSWORD: 8c2677a2726089ff9782b38647ee169a7ae920b9
+      POSTGRES_PASSWORD: CHANGEME_CHANGEME_TOO
     volumes:
       - pgdata:/var/lib/postgresql/data
 volumes:
