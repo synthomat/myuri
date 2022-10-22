@@ -3,7 +3,7 @@
   (:require [org.corfield.build :as bb]))
 
 (def lib 'net.clojars.synthomat/myuri)
-(def version "0.4")
+(def version (slurp "VERSION"))
 (def main 'myuri.core)
 
 (defn test "Run the tests." [opts]

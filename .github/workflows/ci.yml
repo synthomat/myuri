@@ -1,9 +1,11 @@
 name: CI
 
-on: [push]
+on:
+  - push
+  - workflow_dispatch
 
 jobs:
-  build:
+  Tests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -15,7 +17,7 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Install clojure tools
+      - name: Install Clojure Tools
         uses: DeLaGuardo/setup-clojure@9.5
         with:
           cli: 1.11.1.1165 # Clojure CLI based on tools.deps
@@ -32,9 +34,6 @@ jobs:
             ~/.deps.clj
           # List all files containing dependencies:
           key: cljdeps-${{ hashFiles('deps.edn') }}
-          # key: cljdeps-${{ hashFiles('deps.edn', 'bb.edn') }}
-          # key: cljdeps-${{ hashFiles('project.clj') }}
-          # key: cljdeps-${{ hashFiles('build.boot') }}
           restore-keys: cljdeps-
 
       - name: Run all tests

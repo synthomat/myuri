@@ -1,9 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file. This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
-## [0.4] – UNRELEASED
+## [0.4] – 2022-10-22
 ### Changed
 * Integrated HTMX for dynamic functions
+* Small visual improvements (shows original URL, favicon)
+* CI changes
 
 ## [0.3] – 2022-10-13
 ### Added

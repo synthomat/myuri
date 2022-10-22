@@ -1,27 +1,37 @@
 name: Release
 
-on: [workflow_dispatch]
+on:
+  workflow_run:
+    workflows: ["CI"]
+    branches: ["main"]
+    tags:
+      - v*
+    types:
+      - completed
 
 jobs:
   release:
     runs-on: ubuntu-latest
-    # if: startsWith(github.ref, 'refs/tags/')
-    if: false == false
-
     steps:
-      - name: Install clojure tools
+      - name: Prepare java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Install Clojure Tools
         uses: DeLaGuardo/setup-clojure@9.5
         with:
-          cli: 1.11.1.1113 # Clojure CLI based on tools.deps
+          cli: 1.11.1.1165 # Clojure CLI based on tools.deps
 
           # (optional) To avoid rate limit errors please provide github token
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build artifact
+      - name: Package
         run: clojure -T:build uber
 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            target/*.jar
+            target/myuri-*.jar
