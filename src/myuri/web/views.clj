@@ -37,13 +37,19 @@
   [req]
   [:nav.navbar {:role "navigation" :aria-label "main navigation" :style "border-bottom: #eaeaea 1px solid;"}
    [:div.navbar-brand
-    [:a.navbar-item {:href "/" :style "font-size: 1.4em; font-weight: bold;"} "myuri" [:span {:style "color: red"} "*"]]]
+    [:a.navbar-item {:href "/" :style "font-size: 1.4em; font-weight: bold;"} "myuri" [:span {:style "color: red"} "*"]]
+    [:a.navbar-burger {:role "button" :aria-label "menu" :aria-expanded "false" :data-target "navMenu"}
+     [:span {:aria-hidden "true"}]
+     [:span {:aria-hidden "true"}]
+     [:span {:aria-hidden "true"}]]]
 
-   [:div.navbar-menu
+   [:div#navMenu.navbar-menu
     (if (authenticated? req)
       (list
         [:div.navbar-start
-         [:a.navbar-item {:href "/"} "Home"]]
+         [:a.navbar-item {:href "/"} "Home"]
+         [:div.buttons
+          [:a.button.is-small.is-light.is-link {:href "/new"} "New"]]]
 
         [:div.navbar-end
          [:div.navbar-item
@@ -52,6 +58,8 @@
          [:div.navbar-item.has-dropdown.is-hoverable
           [:a.navbar-link (-> req :identity :username)]
           [:div.navbar-dropdown.is-right
+           #_[:a.navbar-item {:href "/settings"} "Settings"]
+           #_[:hr.navbar-divider]
            [:a.navbar-item {:href "/" :hx-post "/auth/logout" :hx-target "body"} "Log out"]]]])
 
       [:div.navbar-end
@@ -107,7 +115,7 @@
           [:div.container {:style "margin-top: 20px;"}
            [:h3.is-size-3 "Edit Bookmark"]
            [:div {:style "padding: 10px"}
-            [:form {:action (str "/bookmarks/" (:bookmarks/id bm) "/edit")  :method "post"}
+            [:form {:action (str "/bookmarks/" (:bookmarks/id bm) "/edit") :method "post"}
              (anti-forgery-field)
 
              [:div.field
@@ -193,3 +201,38 @@
                (anti-forgery-field)
                [:input {:type "file" :name "data"}]
                [:input {:type "submit" :value "Import"}]]]]))
+
+
+(defn settings-nav
+  "docstring"
+  [req]
+  [:aside.menu
+   #_(list
+     [:p.menu-label "General"]
+     [:ul.menu-list
+      [:li [:a "Account"]]])
+   #_[:p.menu-label "Administration"]
+   #_[:ul.menu-list
+      [:li [:a "Team Settings"]]
+      [:li
+       [:a.is-active "Manage Your Team"]
+       [:ul
+        [:li [:a "Members"]]
+        [:li [:a "Plugins"]]
+        [:li [:a "Add a member"]]]]
+      [:li [:a "Invitations"]]
+      [:li [:a "Cloud Storage Environment Settings"]]
+      [:li [:a "Authentication"]]]
+   [:p.menu-label "Integrations"]
+   [:ul.menu-list
+    [:li [:a {:href "/settings/tokens"} "Tokens"]]]])
+
+(defn settings-layout
+  "docstring"
+  [req & children]
+  (layout req
+          [:div.container {:style "margin-top: 50px"}
+           [:div.columns
+            [:div.column.is-2 (settings-nav req)]
+
+            [:div.column children]]]))

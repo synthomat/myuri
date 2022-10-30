@@ -11,7 +11,7 @@
   [ds user-id]
   (sql/query ds ["select * from bookmarks
                   where user_id = ?
-                 order by created_at desc" user-id]))
+                  order by created_at desc" user-id]))
 
 (defn store!
   "docstring"
@@ -24,6 +24,14 @@
   (log/debug "Deleting bookmark " user-id bookmark-id)
   (sql/delete! ds :bookmarks {:id bookmark-id :user_id user-id}))
 
+
+
+(defn user-by-token
+  "docstring"
+  [ds token]
+  (jdbc/execute-one! ds ["select u.* from api_tokens at
+                          left join users u on u.id = at.user_id
+                          where at.token = ?" token]))
 
 ;; Database Management --------------------------------------------------------
 

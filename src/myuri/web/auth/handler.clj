@@ -6,6 +6,7 @@
             [myuri.web.auth.views :as av]
             [ring.util.response :as resp]
             [ring.util.response]
+            [myuri.db :as db]
             [myuri.web.utils :refer [is-post?]]))
 
 
@@ -29,6 +30,17 @@
                                         :username (:users/username user)
                                         :email    (:users/email user)}}))
         (av/login-view req true)))))
+
+(defn token-auth
+  "docstring"
+  [ds]
+  (fn [req token]
+    (println "trying to authenticate using token" token)
+    (when-let [user (db/user-by-token ds token)]
+      (println "authenticated" user)
+      {:id       (:users/id user)
+       :username (:users/username user)
+       :email    (:users/email user)})))
 
 (defn logout
   "docstring"
@@ -63,6 +75,8 @@
         (do
           (model/create-user ds nil user)
           (resp/redirect "/auth/login"))))))
+
+
 
 (defn unauthorized-handler
   "Default action on unauthorized event -> redirect to login-page"

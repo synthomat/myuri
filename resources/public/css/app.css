@@ -1,8 +1,13 @@
 html {
     background-color: #f9f9f9;
 }
+
 div.bm-item {
     margin-bottom: 10px;
+}
+
+div.bm-item > a {
+    display: inline-block;
 }
 
 div.bm-item div.bm-footer {

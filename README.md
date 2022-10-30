@@ -5,7 +5,7 @@ Myuri is a simple bookmark manager.
 
 It allows bookmarking websites using a convenient bookmarklet.
 
-![Version 0.2](doc/screenshots/myuri_0.2.jpeg)
+![Version 0.5](doc/screenshots/myuri_0.5.png)
 
 ## Kick Start with Docker-Compose
 The most convenient way of starting the software is by using docker-compose

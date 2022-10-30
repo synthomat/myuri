@@ -1,20 +1,21 @@
 (ns myuri.web.handler
   (:require [bidi.ring :refer [make-handler]]
+            [ring.middleware.cors :refer [wrap-cors]]
+            [ring.middleware.defaults :refer [wrap-defaults site-defaults api-defaults]]
+            [ring.middleware.reload :refer [wrap-reload]]
+            [ring.util.response :as res]
+            [ring.middleware.json :refer [wrap-json-body wrap-json-response wrap-json-params]]
+            [ring.middleware.session.cookie :refer [cookie-store]]
+            [buddy.auth.backends :as backends]
+            [buddy.auth :refer [authenticated?]]
+            [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
+            [buddy.auth.accessrules :refer [wrap-access-rules]]
             [cheshire.core :as json]
             [myuri.db :as db]
             [myuri.model :as m]
             [myuri.web.auth.handler :as ah]
             [myuri.web.views :as v]
-            [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
-            [ring.middleware.reload :refer [wrap-reload]]
-            [ring.util.response :as res]
-            [buddy.auth.backends :as backends]
-            [buddy.auth :refer [authenticated?]]
-            [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
-            [buddy.auth.accessrules :refer [wrap-access-rules]]
-            [ring.middleware.session.cookie :refer [cookie-store]]
             [myuri.web.utils :refer [user-id is-post?]]
-            [ring.middleware.cors :refer [wrap-cors]]
             [myuri.web.auth.handler :refer [unauthorized-handler]])
   (:import (java.time.format DateTimeFormatter)))
 
@@ -36,15 +37,21 @@
   (let [bookmarks (db/bookmarks ds (user-id req))]
     (-> (v/index-view req bookmarks))))
 
+(defn create-bookmark
+  "docstring"
+  [ds user-id bm]
+  (db/store! ds {:site_url   (:url bm)
+                 :site_title (:title bm)
+                 :user_id    user-id}))
+
 (defn new-bookmark-handler
   "docstring"
   [{:keys [ds] :as req}]
   (if (is-post? req)
     (let [{:keys [su st p]} (:params req)
           user-id (user-id req)]
-      (db/store! ds {:site_url   su
-                     :site_title st
-                     :user_id    user-id})
+      (create-bookmark ds user-id {:url   su
+                                   :title st})
       (if (= p "1")
         (v/site req
                 [:h2 "You may close this popup now"]
@@ -70,7 +77,7 @@
       (if (is-post? req)
         (let [{:keys [su st]} (:params req)]
           (m/update-bookmark ds bookmark-id {:bookmarks/site_title st
-                                             :bookmarks/site_url su})
+                                             :bookmarks/site_url   su})
           (res/redirect "/"))
         (v/edit-bookmark-view req bm))
 
@@ -109,9 +116,31 @@
                       (json/encode {:pretty true}))]
     (send-json-file json-data file-name)))
 
+(defn token-settings-handler
+  "docstring"
+  [req]
+  (v/settings-layout
+    req
+    [:h3.is-size-3 "Tokens"] [:button.button.is-primary "Create Token"]
+    [:table.table.is-fullwidth.is-hoverable
+     [:thead
+      [:tr
+       [:th "Name"]
+       [:th "Id"]
+       [:th "Token"]
+       [:th "Valid until"]
+       [:th ""]]]
+     [:tbody
+      [:tr
+       [:td "iOS App"]
+       [:td "98e9a"]
+       [:td "gKWUrdDNNNrdy3psURELxSdb2NprCtIUxd97e5sC"]
+       [:td ""]
+       [:td [:a {:href "#"} "delete"]]]]]))
+
 
 ;; Routes and Middlewares -----------------------------------------------------
-(def routes
+(def web-routes
   ["/" {""                 index-handler
         "new"              new-bookmark-handler
         ["bookmarks/" :id] {:delete {"" delete-bookmark-handler}
@@ -121,6 +150,11 @@
         "auth/"            {"login"    ah/login-handler
                             :post      {"logout" ah/logout}
                             "register" ah/register-handler}
+        "settings"         {""        (fn [req] (res/redirect "/settings/tokens"))
+                            "/tokens" token-settings-handler}
+        "api/bookmarks"    {"" (fn [req]
+                                 (res/response
+                                   {:response "ok"}))}
         true               not-found-handler}])
 
 (defn wrap-system
@@ -132,18 +166,21 @@
         (handler))))
 
 
-(def authn-backend (backends/session {:unauthorized-handler unauthorized-handler}))
+(def cookie-backend (backends/session {:unauthorized-handler unauthorized-handler}))
+(defn token-backend
+  [ds]
+  (backends/token {:authfn ah/token-auth}))
 
 (def authz-rules [{:pattern #"^/auth/.*" :handler (constantly true)} ; Let everyone use the auth endpoints
                   {:pattern #"^/.*" :handler authenticated?}])
 
 (defn wrap-auth
   "docstring"
-  [handler backend rules]
+  [handler rules & backends]
   (-> handler
       (wrap-access-rules {:rules rules})
-      (wrap-authentication backend)
-      (wrap-authorization backend)))
+      ((fn [h] (apply wrap-authentication h backends)))
+      (wrap-authorization cookie-backend)))
 
 (defn wrap-site-defaults
   "docstring"
@@ -151,16 +188,18 @@
   (let [cookie-stor (cookie-store {:key (:cookie-secret opts)})
         defaults (-> site-defaults
                      (assoc-in [:session :store] cookie-stor)
-                     (assoc-in [:session :cookie-attrs :same-site] :lax))]
+                     (assoc-in [:session :cookie-attrs :same-site] :lax)
+                     (assoc-in [:security :anti-forgery] false))]
     (wrap-defaults handler defaults)))
-
 
 (defn new-handler
   [opts]
-  (-> (make-handler routes)
-      (wrap-auth authn-backend authz-rules)
+  (-> (make-handler web-routes)
+      (wrap-auth authz-rules cookie-backend (token-backend (:ds opts)))
       (wrap-system opts)
       (wrap-site-defaults opts)
       #_(wrap-cors :access-control-allow-origin #".*"
-                 :access-control-allow-methods [:get :put :post :delete])
+                   :access-control-allow-methods [:get :put :post :delete])
+      (wrap-json-params {:keywords? true :bigdecimals? true})
+      (wrap-json-response)
       (wrap-reload)))

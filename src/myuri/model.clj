@@ -62,7 +62,8 @@
   "Maps database objects of bookmarks into map structure"
   [db-bookmarks]
   (-> (fn [bm]
-        {:site_url   (:bookmarks/site_url bm)
+        {:id         (:bookmarks/id bm)
+         :site_url   (:bookmarks/site_url bm)
          :site_title (:bookmarks/site_title bm)
          :created_at (:bookmarks/created_at bm)})
       (map db-bookmarks)))
@@ -72,7 +73,7 @@
   "Creates a data dump map from all bookmarks"
   [ds user-id]
   (let [all-bookmarks (db/bookmarks ds user-id)
-        format-version "1"
+        format-version "1.1"
         mapped-data (bm->map all-bookmarks)]
     {:time           (LocalDateTime/now)
      :size           (count mapped-data)
@@ -82,3 +83,4 @@
 (defn import-bookmarks
   "docstring"
   [ds data])
+
