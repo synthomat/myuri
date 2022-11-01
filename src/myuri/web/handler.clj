@@ -16,7 +16,9 @@
             [myuri.web.auth.handler :as ah]
             [myuri.web.views :as v]
             [myuri.web.utils :refer [user-id is-post?]]
-            [myuri.web.auth.handler :refer [unauthorized-handler]])
+            [myuri.web.auth.handler :refer [unauthorized-handler]]
+            [ring.util.response :as resp]
+            [myuri.web.utils :as u])
   (:import (java.time.format DateTimeFormatter)))
 
 ;; Utils ----------------------------------------------------------------------
@@ -119,25 +121,22 @@
 (defn token-settings-handler
   "docstring"
   [req]
-  (v/settings-layout
-    req
-    [:h3.is-size-3 "Tokens"] [:button.button.is-primary "Create Token"]
-    [:table.table.is-fullwidth.is-hoverable
-     [:thead
-      [:tr
-       [:th "Name"]
-       [:th "Id"]
-       [:th "Token"]
-       [:th "Valid until"]
-       [:th ""]]]
-     [:tbody
-      [:tr
-       [:td "iOS App"]
-       [:td "98e9a"]
-       [:td "gKWUrdDNNNrdy3psURELxSdb2NprCtIUxd97e5sC"]
-       [:td ""]
-       [:td [:a {:href "#"} "delete"]]]]]))
+  (v/token-view req))
 
+(defn ui-settings-handler
+  "docstring"
+  [{:keys [ds] :as req}]
+  (let [us (m/get-user-setting ds(u/user-id req) nil)
+        setting-map (->> (map (fn [s] [(keyword (:user_settings/setting_name s)) (:user_settings/json_value s)]) us)
+                        (into {}))]
+    (v/ui-settings-view req setting-map)))
+
+(defn config-toggle-handler
+  "docstring"
+  [{:keys [ds] :as req}]
+
+  (println (m/update-user-setting ds (u/user-id req) (-> req :params)))
+  (-> (resp/response {:value "ok"})))
 
 ;; Routes and Middlewares -----------------------------------------------------
 (def web-routes
@@ -151,10 +150,13 @@
                             :post      {"logout" ah/logout}
                             "register" ah/register-handler}
         "settings"         {""        (fn [req] (res/redirect "/settings/tokens"))
-                            "/tokens" token-settings-handler}
-        "api/bookmarks"    {"" (fn [req]
-                                 (res/response
-                                   {:response "ok"}))}
+                            "/tokens" token-settings-handler
+                            "/ui"     ui-settings-handler}
+        "api/"             {"bookmarks"          {"" (fn [req]
+                                                       (res/response
+                                                         {:response "ok"}))}
+                            ["user/settings"] {:put {"" config-toggle-handler}}}
+
         true               not-found-handler}])
 
 (defn wrap-system

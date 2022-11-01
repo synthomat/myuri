@@ -5,7 +5,7 @@ document.addEventListener("htmx:configRequest", (evt) => {
     evt.detail.headers['X-CSRF-Token'] = csrfToken;
 });
 
-document.addEventListener("DOMContentLoaded", (e) => {
+document.addEventListener("DOMContentLoaded", () => {
     let icons = document.querySelectorAll(".site-icon")
     icons.forEach(el => {
         el.addEventListener('error', (e) => {
@@ -14,19 +14,30 @@ document.addEventListener("DOMContentLoaded", (e) => {
     })
 
     // Get all "navbar-burger" elements
-    const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+    const navbarBurger = document.querySelector('.navbar-burger')
 
     // Add a click event on each of them
-    $navbarBurgers.forEach( el => {
-        el.addEventListener('click', () => {
+    navbarBurger.addEventListener('click', () => {
+        // Get the target from the "data-target" attribute
+        const target = navbarBurger.dataset.target;
+        const $target = document.getElementById(target);
 
-            // Get the target from the "data-target" attribute
-            const target = el.dataset.target;
-            const $target = document.getElementById(target);
-
-            // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
-            el.classList.toggle('is-active');
-            $target.classList.toggle('is-active');
-        });
+        // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
+        navbarBurger.classList.toggle('is-active');
+        $target.classList.toggle('is-active');
     });
+
+    let configToggles = document.querySelectorAll('.config-toggles input[type="checkbox"]')
+    configToggles.forEach(el => {
+        el.addEventListener('change', (e) => {
+            let target = e.target
+            target.value = target.checked
+
+            fetch('/api/user/settings', {
+                method: 'put',
+                body: JSON.stringify({[target.name]: target.checked}),
+                headers: {"Content-type": "application/json"}
+            })
+        })
+    })
 })

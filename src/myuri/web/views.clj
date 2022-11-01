@@ -174,11 +174,21 @@
    [:li [:a {:href "#"} "8"]]
    [:li [:a {:href "#"} [:span {:uk-pagination-next "true"}]]]])
 
+(defn quick-add-comp
+  "docstring"
+  [req]
+  [:form {:action "/new" :method "post"}
+   (anti-forgery-field)
+   [:div.field
+    [:div.control
+     [:input.input {:type "text" :name "su" :placeholder "Quick Add" :required true}]]]])
+
 (defn index-view
   "docstring"
   [req bookmarks]
   (layout req
           [:div.container {:style "margin-top: 20px;"}
+           (quick-add-comp req)
            [:h3.is-size-3 "Bookmarks"]
            (bookmarks-table req bookmarks)]
 
@@ -202,15 +212,19 @@
                [:input {:type "file" :name "data"}]
                [:input {:type "submit" :value "Import"}]]]]))
 
+;; Settings Views -------------------------------------------------------------
 
 (defn settings-nav
   "docstring"
   [req]
   [:aside.menu
+   [:p.menu-label "General"]
+   [:ul.menu-list
+    [:li [:a {:href "/settings/ui"} "User Interface"]]]
    #_(list
-     [:p.menu-label "General"]
-     [:ul.menu-list
-      [:li [:a "Account"]]])
+       [:p.menu-label "General"]
+       [:ul.menu-list
+        [:li [:a "Account"]]])
    #_[:p.menu-label "Administration"]
    #_[:ul.menu-list
       [:li [:a "Team Settings"]]
@@ -236,3 +250,50 @@
             [:div.column.is-2 (settings-nav req)]
 
             [:div.column children]]]))
+
+(defn token-view
+  "docstring"
+  [req]
+
+  (settings-layout
+    req
+    [:h3.is-size-3 "Tokens"] [:button.button.is-primary "Create Token"]
+
+    [:table.table.is-fullwidth.is-hoverable
+     [:thead
+      [:tr
+       [:th "Name"]
+       [:th "Id"]
+       [:th "Token"]
+       [:th "Valid until"]
+       [:th ""]]]
+     [:tbody
+      [:tr
+       [:td "iOS App"]
+       [:td "98e9a"]
+       [:td "gKWUrdDNNNrdy3psURELxSdb2NprCtIUxd97e5sC"]
+       [:td ""]
+       [:td [:a {:href "#"} "delete"]]]]]))
+
+(defn ui-settings-view
+  "docstring"
+  [req smap]
+
+  (settings-layout
+    req
+    [:h3.is-size-3 "UI Config"]
+
+    [:form.config-toggles
+     [:div.field
+      [:div.control
+       [:label.checkbox
+        [:input {:type "checkbox" :name "detail_fetching" :checked (:detail_fetching smap)}] " Details fetching"]]
+      [:p.help "Given only the site url, it will fetch site details in the background"]]
+
+     [:div.field
+      [:div.control
+       [:label.checkbox
+        [:input {:type "checkbox" :name "display_icons" :checked (:display_icons smap)}] " Display site icons"]]
+      [:p.help "Will download and cache site icons"]]]))
+
+

@@ -3,8 +3,10 @@
             [honey.sql :as hsql]
             [myuri.db :as db]
             [next.jdbc :as jdbc]
-            [next.jdbc.sql :as sql])
-  (:import (java.time LocalDateTime)))
+            [next.jdbc.sql :as sql]
+            [honey.sql.helpers :as hh])
+  (:import (java.time LocalDateTime)
+           (org.postgresql.util PGobject)))
 
 ;; Users ----------------------------------------------------------------------
 
@@ -84,3 +86,36 @@
   "docstring"
   [ds data])
 
+;; User Settings --------------------------------------------------------------
+(def setting-defaults
+  {:display_icons false
+   :detail_fetching true})
+
+(defn get-user-setting
+  "docstring"
+  ([ds user-id name]
+   (if (nil? name)
+     (sql/find-by-keys ds :user_settings {:user_id user-id})
+     (-> (sql/find-by-keys ds :user_settings {:user_id      user-id
+                                              :setting_name name})
+         first))))
+
+(defn update-user-setting
+  "docstring"
+  ([ds user-id key-values]
+   (let [values (-> (map (fn [s] {:user_id      user-id
+                                  :setting_name (name (get s 0))
+                                  :json_value   (doto (PGobject.)
+                                                  (.setType "json")
+                                                  (.setValue (db/->json (get s 1))))})
+                         key-values)
+                    vec)
+         stat (-> (hh/insert-into :user_settings)
+                  (hh/values values)
+                  (hh/on-conflict :user_id :setting_name)
+                  (hh/do-update-set :json_value)
+                  (hh/returning :*)
+                  hsql/format)]
+    (println values)
+     (println stat)
+     (jdbc/execute! ds stat))))
