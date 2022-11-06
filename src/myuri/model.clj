@@ -82,14 +82,8 @@
      :format_version format-version
      :bookmarks      mapped-data}))
 
-(defn import-bookmarks
-  "docstring"
-  [ds data])
-
 ;; User Settings --------------------------------------------------------------
-(def setting-defaults
-  {:display_icons false
-   :detail_fetching true})
+
 
 (defn get-user-setting
   "docstring"

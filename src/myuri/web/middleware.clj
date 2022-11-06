@@ -1,15 +1,16 @@
 (ns myuri.web.middleware
-  (:require [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
+  (:require [buddy.auth :refer [authenticated?]]
             [buddy.auth.accessrules :refer [wrap-access-rules]]
-            [ring.middleware.defaults :refer [wrap-defaults site-defaults api-defaults]]
-            [ring.middleware.session.cookie :refer [cookie-store]]
             [buddy.auth.backends :as backends]
-            [buddy.auth :refer [authenticated?]]
-            [myuri.web.auth.handler :refer [unauthorized-handler token-auth]]
-            [myuri.web.auth.handler :as ah]
+            [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
+
             [ring.middleware.cors :refer [wrap-cors]]
+            [ring.middleware.defaults :refer [wrap-defaults site-defaults api-defaults]]
+            [ring.middleware.json :refer [wrap-json-response wrap-json-params]]
             [ring.middleware.reload :refer [wrap-reload]]
-            [ring.middleware.json :refer [wrap-json-response wrap-json-params]]))
+            [ring.middleware.session.cookie :refer [cookie-store]]
+
+            [myuri.web.auth.handler :refer [unauthorized-handler token-auth]]))
 
 (def cookie-backend (backends/session {:unauthorized-handler unauthorized-handler}))
 

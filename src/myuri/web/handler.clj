@@ -141,7 +141,7 @@
         "auth/"            {"login"    ah/login-handler
                             :post      {"logout" ah/logout}
                             "register" ah/register-handler}
-        "settings"         {""        (fn [req] (res/redirect "/settings/tokens"))
+        "settings"         {""        (fn [req] (res/redirect "/settings/ui"))
                             "/tokens" token-settings-handler
                             "/ui"     ui-settings-handler}
         "api/"             {"bookmarks"          {"" (fn [req]

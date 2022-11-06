@@ -214,38 +214,35 @@
 
 ;; Settings Views -------------------------------------------------------------
 
+(defn uri-prefix
+  "docstring"
+  [req sub]
+  (clojure.string/starts-with? (:uri req) sub))
+
+(defn active
+  "docstring"
+  [req prefix]
+  (and (uri-prefix req prefix) "is-active"))
+
 (defn settings-nav
   "docstring"
   [req]
-  [:aside.menu
-   [:p.menu-label "General"]
-   [:ul.menu-list
-    [:li [:a {:href "/settings/ui"} "User Interface"]]]
-   #_(list
-       [:p.menu-label "General"]
-       [:ul.menu-list
-        [:li [:a "Account"]]])
-   #_[:p.menu-label "Administration"]
-   #_[:ul.menu-list
-      [:li [:a "Team Settings"]]
-      [:li
-       [:a.is-active "Manage Your Team"]
-       [:ul
-        [:li [:a "Members"]]
-        [:li [:a "Plugins"]]
-        [:li [:a "Add a member"]]]]
-      [:li [:a "Invitations"]]
-      [:li [:a "Cloud Storage Environment Settings"]]
-      [:li [:a "Authentication"]]]
-   [:p.menu-label "Integrations"]
-   [:ul.menu-list
-    [:li [:a {:href "/settings/tokens"} "Tokens"]]]])
+  (let [is-active (partial active req)]
+    [:aside.menu
+     [:p.menu-label "General"]
+     [:ul.menu-list
+      [:li [:a {:href "/settings/ui" :class (is-active "/settings/ui")} "User Interface"]]]
+
+     #_#_[:p.menu-label "Integrations"]
+     [:ul.menu-list
+      [:li [:a {:href "/settings/tokens" :class (is-active "/settings/tokens")} "Tokens"]]]]))
 
 (defn settings-layout
   "docstring"
   [req & children]
   (layout req
-          [:div.container {:style "margin-top: 50px"}
+          [:div.container {:style "margin-top: 30px"}
+           [:h3.is-size-3 {:style "margin-bottom: 20px"} "Account Settings"]
            [:div.columns
             [:div.column.is-2 (settings-nav req)]
 
@@ -284,7 +281,7 @@
     [:h3.is-size-3 "UI Config"]
 
     [:form.config-toggles
-     [:div.field
+     #_[:div.field
       [:div.control
        [:label.checkbox
         [:input {:type "checkbox" :name "detail_fetching" :checked (:detail_fetching smap)}] " Details fetching"]]
@@ -294,6 +291,6 @@
       [:div.control
        [:label.checkbox
         [:input {:type "checkbox" :name "display_icons" :checked (:display_icons smap)}] " Display site icons"]]
-      [:p.help "Will download and cache site icons"]]]))
+      [:p.help "Will load site icons from original location"]]]))
 
 

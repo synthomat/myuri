@@ -76,8 +76,6 @@
   (log/debug "Deleting bookmark " user-id bookmark-id)
   (sql/delete! ds :bookmarks {:id bookmark-id :user_id user-id}))
 
-
-
 (defn user-by-token
   "docstring"
   [ds token]
