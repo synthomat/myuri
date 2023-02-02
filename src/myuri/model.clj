@@ -1,10 +1,10 @@
 (ns myuri.model
   (:require [buddy.hashers :as hashers]
             [honey.sql :as hsql]
+            [honey.sql.helpers :as hh]
             [myuri.db :as db]
             [next.jdbc :as jdbc]
-            [next.jdbc.sql :as sql]
-            [honey.sql.helpers :as hh])
+            [next.jdbc.sql :as sql])
   (:import (java.time LocalDateTime)
            (org.postgresql.util PGobject)))
 

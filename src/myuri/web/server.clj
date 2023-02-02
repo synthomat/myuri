@@ -1,8 +1,8 @@
 (ns myuri.web.server
-  (:require [com.stuartsierra.component :as component]
-            [ring.adapter.jetty :as j]
+  (:require [clojure.tools.logging :as log]
+            [com.stuartsierra.component :as component]
             [myuri.web.handler :as handler]
-            [clojure.tools.logging :as log]))
+            [ring.adapter.jetty :as j]))
 
 (defrecord ServerComponent [options db]
   component/Lifecycle

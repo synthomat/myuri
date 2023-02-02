@@ -3,9 +3,7 @@
             [buddy.auth.accessrules :refer [wrap-access-rules]]
             [buddy.auth.backends :as backends]
             [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
-
-            [ring.middleware.cors :refer [wrap-cors]]
-            [ring.middleware.defaults :refer [wrap-defaults site-defaults api-defaults]]
+            [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
             [ring.middleware.json :refer [wrap-json-response wrap-json-params]]
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.middleware.session.cookie :refer [cookie-store]]
@@ -20,7 +18,6 @@
 
 (def authz-rules [{:pattern #"^/auth/.*" :handler (constantly true)} ; Let everyone use the auth endpoints
                   {:pattern #"^/.*" :handler authenticated?}])
-
 
 (defn wrap-system
   "Injects System components into the request map"
