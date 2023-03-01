@@ -2,12 +2,11 @@
   (:require [buddy.hashers :as hashers]
             [malli.core :as malli]
             [malli.error :as me]
+            [myuri.db :as db]
             [myuri.model :as model]
             [myuri.web.auth.views :as av]
-            [ring.util.response :as resp]
-            [ring.util.response]
-            [myuri.db :as db]
-            [myuri.web.utils :refer [is-post?]]))
+            [myuri.web.utils :refer [is-post?]]
+            [ring.util.response :as resp]))
 
 
 (defn check-user-password

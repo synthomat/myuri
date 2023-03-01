@@ -44,7 +44,6 @@ $ DATABASE_URL=jdbc:postgresql://localhost/myuri java -jar target/myuri-0.4.jar
 
 
 
-
 Launch with Docker-Compose
 
 ```bash
@@ -58,7 +57,7 @@ $ docker-compose up -d
 
 ## Build Docker image
 ```bash
-$ docker build -t myuri:0.4 .
+$ docker build -t myuri:0.6 .
 ```
 
 ## Dev environment
@@ -83,6 +82,6 @@ $ clj -T:build test
 
 ## License
 
-Copyright © 2022 Synthomat
+Copyright © 2022–2023 Synthomat
 
 Distributed under the ISC License

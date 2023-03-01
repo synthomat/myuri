@@ -84,19 +84,6 @@
         [:a {:href (format "/bookmarks/%s" (-> bm :bookmarks/id str)) :hx-target "closest div.bm-item" :hx-swap "delete" :hx-delete (format "/bookmarks/%s" (-> bm :bookmarks/id str))} "delete"]]])))
 
 
-(defn pagination
-  "docstring"
-  [req]
-  [:ul.uk-pagination.uk-flex-center {:uk-margin "true"}
-   [:li [:a {:href "#"} [:span {:uk-pagination-previous "true"}]]]
-   [:li [:a {:href "#"} "1"]]
-   [:li.uk-disabled [:span "…"]]
-   [:li [:a {:href "#"} "5"]]
-   [:li [:a {:href "#"} "6"]]
-   [:li.uk-active [:span "7"]]
-   [:li [:a {:href "#"} "8"]]
-   [:li [:a {:href "#"} [:span {:uk-pagination-next "true"}]]]])
-
 (defn quick-add-comp
   "docstring"
   [req]
@@ -110,7 +97,6 @@
   "docstring"
   [req bookmarks]
   (l/layout req
-          [:div.container {:style "margin-top: 20px;"}
+          [:div.container {:style "margin-top: 30px;"}
            #_(quick-add-comp req)
-           [:h3.is-size-3 "Bookmarks"]
            (bookmarks-table req bookmarks)]))
