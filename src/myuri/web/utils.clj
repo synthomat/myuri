@@ -31,3 +31,9 @@
      (catch Exception e "")))
   ([url]
    (domain-from-url url false)))
+
+(defn rand-str
+  [len]
+  (let [chars "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        clen (count chars)]
+    (apply str (take len (repeatedly #(get chars (rand clen)))))))

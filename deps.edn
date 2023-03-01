@@ -9,6 +9,7 @@
            ring/ring-jetty-adapter          {:mvn/version "1.9.6"}
            ring/ring-defaults               {:mvn/version "0.3.4"}
            ring/ring-devel                  {:mvn/version "1.9.6"}
+           ring/ring-json                   {:mvn/version "0.5.1"}
            ring-cors/ring-cors              {:mvn/version "0.1.13"}
            bidi/bidi                        {:mvn/version "2.1.6"} ; Routing
            hiccup/hiccup                    {:mvn/version "1.0.5"} ; HTML Templating
@@ -19,14 +20,16 @@
 
            ;; Database Layer --------------------------------------------------
            seancorfield/next.jdbc           {:mvn/version "1.2.659"} ; JDBC
-           org.postgresql/postgresql        {:mvn/version "42.5.0"}
-           migratus/migratus                {:mvn/version "1.4.4"} ; DB Migrations
+           org.postgresql/postgresql        {:mvn/version "42.5.1"}
+           migratus/migratus                {:mvn/version "1.4.6"} ; DB Migrations
            com.github.seancorfield/honeysql {:mvn/version "2.3.928"} ; SQL Abstraction
 
            ;; Various Libraries -----------------------------------------------
            cheshire/cheshire                {:mvn/version "5.11.0"} ; JSON Lib
            com.draines/postal               {:mvn/version "2.0.5"} ; SMTP Client
-           metosin/malli                    {:mvn/version "0.8.9"} ; Validation
+           metosin/malli                    {:mvn/version "0.9.2"} ; Validation
+           clj-http/clj-http                {:mvn/version "3.12.3"}
+           org.clj-commons/hickory          {:mvn/version "0.7.3"}
            }
 
 

@@ -5,7 +5,7 @@ Myuri is a simple bookmark manager.
 
 It allows bookmarking websites using a convenient bookmarklet.
 
-![Version 0.2](doc/screenshots/myuri_0.2.jpeg)
+![Version 0.5](doc/screenshots/myuri_0.5.png)
 
 ## Kick Start with Docker-Compose
 The most convenient way of starting the software is by using docker-compose
@@ -44,7 +44,6 @@ $ DATABASE_URL=jdbc:postgresql://localhost/myuri java -jar target/myuri-0.4.jar
 
 
 
-
 Launch with Docker-Compose
 
 ```bash
@@ -58,7 +57,7 @@ $ docker-compose up -d
 
 ## Build Docker image
 ```bash
-$ docker build -t myuri:0.4 .
+$ docker build -t myuri:0.6 .
 ```
 
 ## Dev environment
@@ -83,6 +82,6 @@ $ clj -T:build test
 
 ## License
 
-Copyright © 2022 Synthomat
+Copyright © 2022–2023 Synthomat
 
 Distributed under the ISC License

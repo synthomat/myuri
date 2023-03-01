@@ -6,7 +6,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: jdbc:postgresql://db/myuri?user=myuri&password=CHANGEME_CHANGEME_PLEASE
+      DATABASE_URL: jdbc:postgresql://db/myuri?user=myuri&password=CHANGE_ME
     links:
       - db
     depends_on:
@@ -15,7 +15,7 @@ services:
     image: postgres:14.2
     environment:
       POSTGRES_USER: myuri
-      POSTGRES_PASSWORD: CHANGEME_CHANGEME_TOO
+      POSTGRES_PASSWORD: CHANGE_ME_TOO
     volumes:
       - pgdata:/var/lib/postgresql/data
 volumes:

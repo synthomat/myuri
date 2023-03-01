@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to this project will be documented in this file. This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
+## [0.6] – 2023-03-01
+### Fixed
+* Navigation renders correctly on mobile devices
+
+### Added
+* Token authentication – no yet though
+
 ## [0.5] – 2022-10-23
 ### Fixed
 * Username/Password check was too permissive and did not check the password correctly

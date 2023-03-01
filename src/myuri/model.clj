@@ -1,10 +1,12 @@
 (ns myuri.model
   (:require [buddy.hashers :as hashers]
             [honey.sql :as hsql]
+            [honey.sql.helpers :as hh]
             [myuri.db :as db]
             [next.jdbc :as jdbc]
             [next.jdbc.sql :as sql])
-  (:import (java.time LocalDateTime)))
+  (:import (java.time LocalDateTime)
+           (org.postgresql.util PGobject)))
 
 ;; Users ----------------------------------------------------------------------
 
@@ -62,7 +64,8 @@
   "Maps database objects of bookmarks into map structure"
   [db-bookmarks]
   (-> (fn [bm]
-        {:site_url   (:bookmarks/site_url bm)
+        {:id         (:bookmarks/id bm)
+         :site_url   (:bookmarks/site_url bm)
          :site_title (:bookmarks/site_title bm)
          :created_at (:bookmarks/created_at bm)})
       (map db-bookmarks)))
@@ -72,13 +75,41 @@
   "Creates a data dump map from all bookmarks"
   [ds user-id]
   (let [all-bookmarks (db/bookmarks ds user-id)
-        format-version "1"
+        format-version "1.1"
         mapped-data (bm->map all-bookmarks)]
     {:time           (LocalDateTime/now)
      :size           (count mapped-data)
      :format_version format-version
      :bookmarks      mapped-data}))
 
-(defn import-bookmarks
+;; User Settings --------------------------------------------------------------
+
+
+(defn get-user-setting
   "docstring"
-  [ds data])
+  ([ds user-id name]
+   (if (nil? name)
+     (sql/find-by-keys ds :user_settings {:user_id user-id})
+     (-> (sql/find-by-keys ds :user_settings {:user_id      user-id
+                                              :setting_name name})
+         first))))
+
+(defn update-user-setting
+  "docstring"
+  ([ds user-id key-values]
+   (let [values (-> (map (fn [s] {:user_id      user-id
+                                  :setting_name (name (get s 0))
+                                  :json_value   (doto (PGobject.)
+                                                  (.setType "json")
+                                                  (.setValue (db/->json (get s 1))))})
+                         key-values)
+                    vec)
+         stat (-> (hh/insert-into :user_settings)
+                  (hh/values values)
+                  (hh/on-conflict :user_id :setting_name)
+                  (hh/do-update-set :json_value)
+                  (hh/returning :*)
+                  hsql/format)]
+    (println values)
+     (println stat)
+     (jdbc/execute! ds stat))))
