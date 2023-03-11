@@ -1,6 +1,5 @@
 (ns myuri.web.bookmarks.views
-  (:require [hiccup.page :as hp]
-            [ring.util.anti-forgery :refer [anti-forgery-field]]
+  (:require [ring.util.anti-forgery :refer [anti-forgery-field]]
             [myuri.web.utils :as u]
             [myuri.web.views :as l])
   (:import (java.text SimpleDateFormat)))
@@ -29,30 +28,30 @@
                [:input.input {:type "text" :name "st" :value st}]]]
              [:div.field
               [:div.control
-               [:input.button.is-link {:type "submit" :value "create"}]]]]])))
+               [:input.button.is-link {:type "submit" :value "create" :autofocus true}]]]]])))
 
 (defn edit-bookmark-view
   "docstring"
   [req bm]
   (l/layout req
-          [:div.container {:style "margin-top: 20px;"}
-           [:h3.is-size-3 "Edit Bookmark"]
-           [:div {:style "padding: 10px"}
-            [:form {:action (str "/bookmarks/" (:bookmarks/id bm) "/edit") :method "post"}
-             (anti-forgery-field)
+            [:div.container {:style "margin-top: 20px;"}
+             [:h3.is-size-3 "Edit Bookmark"]
+             [:div {:style "padding: 10px"}
+              [:form {:action (str "/bookmarks/" (:bookmarks/id bm) "/edit") :method "post"}
+               (anti-forgery-field)
 
-             [:div.field
-              [:label.label "URL"]
-              [:div.control
-               [:input.input {:type "text" :name "su" :value (:bookmarks/site_url bm) :required true}]]]
+               [:div.field
+                [:label.label "URL"]
+                [:div.control
+                 [:input.input {:type "text" :name "su" :value (:bookmarks/site_url bm) :required true}]]]
 
-             [:div.field
-              [:label.label "Title"]
-              [:div.control
-               [:input.input {:type "text" :name "st" :value (:bookmarks/site_title bm)}]]]
-             [:div.field
-              [:div.control
-               [:input.button.is-link {:type "submit" :value "update"}]]]]]]))
+               [:div.field
+                [:label.label "Title"]
+                [:div.control
+                 [:input.input {:type "text" :name "st" :value (:bookmarks/site_title bm)}]]]
+               [:div.field
+                [:div.control
+                 [:input.button.is-link {:type "submit" :value "update"}]]]]]]))
 
 (defn format-date
   "docstring"
@@ -97,6 +96,6 @@
   "docstring"
   [req bookmarks]
   (l/layout req
-          [:div.container {:style "margin-top: 30px;"}
-           #_(quick-add-comp req)
-           (bookmarks-table req bookmarks)]))
+            [:div.container {:style "margin-top: 30px;"}
+             #_(quick-add-comp req)
+             (bookmarks-table req bookmarks)]))
