@@ -7,16 +7,18 @@ create table collections
         constraint collections_users_id_fk
             references users,
     name          varchar(200) not null,
-    protected_key varchar(200)
+    protected_key varchar(200),
+    created_at timestamptz default now() not null,
+    updated_at timestamptz
 );
 
 --;;
 
-
 alter table bookmarks
     add collection_id uuid,
     add constraint bookmarks_collections_id_fk
-        foreign key (collection_id) references collections;
+        foreign key (collection_id) references collections
+            on delete set null;
 
 --;;
 
