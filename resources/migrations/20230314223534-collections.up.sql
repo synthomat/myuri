@@ -17,3 +17,18 @@ alter table bookmarks
     add collection_id uuid,
     add constraint bookmarks_collections_id_fk
         foreign key (collection_id) references collections;
+
+--;;
+
+-- Create default collections for all users
+insert into collections (id, user_id, name, protected_key)
+select gen_random_uuid() as id, id as user_id, 'Default' as name, null as protected_key
+from users u;
+
+--;;
+
+-- Put all bookmarks into the default collection
+update bookmarks
+set collection_id = c.id
+from collections c
+where bookmarks.user_id = c.user_id
