@@ -21,6 +21,7 @@
          [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
          [:link {:rel "stylesheet" :href "https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"}]
          (hp/include-css "/css/app.css")
+         (hp/include-css "https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js")
          (hp/include-js "https://unpkg.com/htmx.org@1.8.2")
          (hp/include-js "/js/app.js")
 
