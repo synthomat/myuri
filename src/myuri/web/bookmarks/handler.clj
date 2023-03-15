@@ -10,8 +10,9 @@
 
 (defn index-handler
   [{:keys [ds] :as req}]
-  (let [bookmarks (db/bookmarks ds (user-id req))]
-    (-> (v/index-view req bookmarks))))
+  (let [bookmarks (db/bookmarks ds (user-id req))
+        collections (db/collections-by-user ds (str (user-id req)))]
+    (-> (v/index-view req bookmarks collections))))
 
 (defn create-bookmark
   "docstring"

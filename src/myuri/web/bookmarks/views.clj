@@ -94,8 +94,11 @@
 
 (defn index-view
   "docstring"
-  [req bookmarks]
+  [req bookmarks collections]
   (l/layout req
             [:div.container {:style "margin-top: 30px;"}
              #_(quick-add-comp req)
+             [:select
+              (for [c collections]
+                [:option (:collections/name c)])]
              (bookmarks-table req bookmarks)]))
