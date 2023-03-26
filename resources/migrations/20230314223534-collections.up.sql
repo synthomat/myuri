@@ -1,15 +1,16 @@
 create table collections
 (
-    id            uuid default gen_random_uuid()
+    id                uuid        default gen_random_uuid()
         constraint collections_pk
             primary key,
-    user_id       uuid         not null
+    user_id           uuid                      not null
         constraint collections_users_id_fk
             references users,
-    name          varchar(200) not null,
-    protected_key varchar(200),
-    created_at timestamptz default now() not null,
-    updated_at timestamptz
+    name              varchar(200)              not null,
+    protected_privkey text,
+    pubkey            text,
+    created_at        timestamptz default now() not null,
+    updated_at        timestamptz
 );
 
 --;;
@@ -23,8 +24,8 @@ alter table bookmarks
 --;;
 
 -- Create default collections for all users
-insert into collections (id, user_id, name, protected_key)
-select gen_random_uuid() as id, id as user_id, 'Default' as name, null as protected_key
+insert into collections (id, user_id, name)
+select gen_random_uuid() as id, id as user_id, 'Default' as name
 from users u;
 
 --;;

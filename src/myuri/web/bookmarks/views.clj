@@ -7,7 +7,7 @@
 
 (defn new-bookmark-view
   "docstring"
-  [req]
+  [req collections]
   (let [{:keys [su st p]} (-> req :params)
         frame (if p l/site l/layout)]
 
@@ -26,6 +26,15 @@
               [:label.label "Title"]
               [:div.control
                [:input.input {:type "text" :name "st" :value st}]]]
+
+             [:div.field
+              [:label.label "Collection"]
+              [:div.control
+               [:div.select
+                [:select {:name "collection_selector"}
+                 (for [c collections]
+                   [:option {:data-pubkey (:collections/pubkey c) :value (:collections/id c)} (:collections/name c)])]]]]
+
              [:div.field
               [:div.control
                [:input.button.is-link {:type "submit" :value "create" :autofocus true}]]]]])))
@@ -98,7 +107,8 @@
   (l/layout req
             [:div.container {:style "margin-top: 30px;"}
              #_(quick-add-comp req)
-             [:select
-              (for [c collections]
-                [:option (:collections/name c)])]
+             [:div.select
+              [:select {:name "collection_selector"}
+               (for [c collections]
+                 [:option {:value (:collections/id c)} (:collections/name c)])]]
              (bookmarks-table req bookmarks)]))

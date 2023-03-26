@@ -40,4 +40,28 @@ document.addEventListener("DOMContentLoaded", () => {
             })
         })
     })
+
+    /*
+    let sel = document.querySelectorAll("select[name='collection_selector']")[0]
+    sel.addEventListener("change", (e) => {
+        console.log(sel.selectedOptions[0].dataset.pubkey)
+    })
+
+    document.getElementsByTagName("form")[0].addEventListener("submit", (e) => {
+        e.preventDefault()
+        let sel = document.querySelectorAll("select[name='collection_selector']")[0]
+        let opt = sel.selectedOptions[0]
+        let pubkey = opt.dataset.pubkey
+
+        let url = document.getElementsByName("su")
+        let title = document.getElementsByName("st")
+
+        let enc = new JSEncrypt()
+        enc.setPublicKey(pubkey)
+        console.log(pubkey)
+
+        console.log(enc.encrypt(url))
+    })
+     */
+
 })

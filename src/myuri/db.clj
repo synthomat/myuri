@@ -1,6 +1,7 @@
 (ns myuri.db
   (:require [next.jdbc :as jdbc]
             [next.jdbc.sql :as sql]
+            [honey.sql :as hsql]
             [com.stuartsierra.component :as component]
             [migratus.core :as migratus]
             [clojure.tools.logging :as log]
@@ -60,10 +61,14 @@
 
 (defn bookmarks
   "docstring"
-  [ds user-id]
-  (sql/query ds ["select * from bookmarks
-                  where user_id = ?
-                  order by created_at desc" user-id]))
+  [ds user-id & {:keys [q]}]
+  (let [base-pred [:and [:= :user_id user-id]]
+        query (when (not-empty q)
+                [:ilike :site_title (str "%" q "%")])
+        pred (conj base-pred query)]
+    (sql/query ds (hsql/format {:select   [:*] :from :bookmarks
+                                :where    pred
+                                :order-by [[:created_at :desc]]}))))
 
 (defn store!
   "docstring"
