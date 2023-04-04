@@ -10,8 +10,10 @@
 
 (defn index-handler
   [{:keys [ds] :as req}]
-  (let [bookmarks (db/bookmarks ds (user-id req))]
-    (-> (v/index-view req bookmarks))))
+  (let [query (-> req :params :q)
+        bookmarks (db/bookmarks ds (user-id req) {:q query})
+        collections (db/collections-by-user ds (str (user-id req)))]
+    (-> (v/index-view req bookmarks collections))))
 
 (defn create-bookmark
   "docstring"
@@ -33,7 +35,8 @@
                 [:h2 "You may close this popup now"]
                 [:script "window.onload = window.close"])
         (res/redirect "/")))
-    (v/new-bookmark-view req)))
+    (let [collections (db/collections-by-user ds (str (user-id req)))]
+      (v/new-bookmark-view req collections))))
 
 (defn delete-bookmark-handler
   "docstring"

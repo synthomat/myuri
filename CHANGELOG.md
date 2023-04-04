@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file. This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
+## [0.7] – 2023-04-05
+### Added
+* Search!!
+
 ## [0.6] – 2023-03-01
 ### Fixed
 * Navigation renders correctly on mobile devices

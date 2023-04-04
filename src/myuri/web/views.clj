@@ -21,8 +21,12 @@
          [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
          [:link {:rel "stylesheet" :href "https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"}]
          (hp/include-css "/css/app.css")
+         (hp/include-js "https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js")
          (hp/include-js "https://unpkg.com/htmx.org@1.8.2")
+         ;(hp/include-js "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js")
+         ;(hp/include-js "/js/jsencrypt.min.js")
          (hp/include-js "/js/app.js")
+
 
          [:title "Myuri"]
          [:script (str "const csrfToken = '" (:anti-forgery-token req) "';")]]
@@ -45,8 +49,11 @@
       (list
         [:div.navbar-start
          [:a.navbar-item {:href "/"} "Home"]
-         [:div.buttons
-          [:a.button.is-small.is-light.is-link {:href "/new"} "New"]]]
+         [:div.navbar-item
+          [:a.button.is-small.is-light.is-link {:href "/new"} "New"]]
+         [:div.navbar-item.column.is-12
+          [:form {:action "/" :method "get"}
+           [:input.input.is-small {:name "q" :type "text" :placeholder "Search…" :value (-> req :params :q)}]]]]
 
         [:div.navbar-end
          [:div.navbar-item
