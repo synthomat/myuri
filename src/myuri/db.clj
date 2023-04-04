@@ -64,7 +64,9 @@
   [ds user-id & {:keys [q]}]
   (let [base-pred [:and [:= :user_id user-id]]
         query (when (not-empty q)
-                [:ilike :site_title (str "%" q "%")])
+                [:or
+                 [:ilike :site_title (str "%" q "%")]
+                 [:ilike :site_url (str "%" q "%")]])
         pred (conj base-pred query)]
     (sql/query ds (hsql/format {:select   [:*] :from :bookmarks
                                 :where    pred

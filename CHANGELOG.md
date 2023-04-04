@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file. This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
+## [0.8] – UNRELEASED
+### Changed
+* The search now considers both site title and url
+
 ## [0.7] – 2023-04-05
 ### Added
 * Search!!
