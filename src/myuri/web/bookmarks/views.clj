@@ -27,7 +27,7 @@
               [:div.control
                [:input.input {:type "text" :name "st" :value st}]]]
 
-             [:div.field
+             #_[:div.field
               [:label.label "Collection"]
               [:div.control
                [:div.select
@@ -107,7 +107,7 @@
   (l/layout req
             [:div.container {:style "margin-top: 30px;"}
              #_(quick-add-comp req)
-             [:div.select
+             #_[:div.select
               [:select {:name "collection_selector"}
                (for [c collections]
                  [:option {:value (:collections/id c)} (:collections/name c)])]]

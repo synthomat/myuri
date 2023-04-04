@@ -7,8 +7,6 @@ create table collections
         constraint collections_users_id_fk
             references users,
     name              varchar(200)              not null,
-    protected_privkey text,
-    pubkey            text,
     created_at        timestamptz default now() not null,
     updated_at        timestamptz
 );
