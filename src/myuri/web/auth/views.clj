@@ -14,6 +14,8 @@
                   [:strong "⚠️ Login failed: "] "we couldn't find such a username/password combination"])
                [:form {:action "/auth/login" :method "post"}
                 (anti-forgery-field)
+                (when-let [to (-> req :params :to)]
+                  [:input {:type "hidden" :name "to" :value to}])
                 [:div.field
                  [:label.label "Username"]
                  [:div.control

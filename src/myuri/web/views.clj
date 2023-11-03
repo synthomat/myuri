@@ -20,11 +20,12 @@
          [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
          [:link {:rel "stylesheet" :href "https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"}]
          (hp/include-css "/css/app.css")
-         (hp/include-js "https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js")
-         (hp/include-js "https://unpkg.com/htmx.org@1.8.2")
+         ; (hp/include-js "https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js")
+         ;[:script {:defer true :src "https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"}]
+         (hp/include-js "https://unpkg.com/htmx.org@1.8.2"
+                        "/js/app.js")
          ;(hp/include-js "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js")
          ;(hp/include-js "/js/jsencrypt.min.js")
-         (hp/include-js "/js/app.js")
 
 
          [:title "Myuri"]
@@ -82,5 +83,5 @@
 
   (site req
         (header req)
-        [:div.uk-container.uk-container-expand
+        [:div.container.container-expand
          children]))
