@@ -18,7 +18,7 @@ jobs:
           java-version: '17'
 
       - name: Install Clojure Tools
-        uses: DeLaGuardo/setup-clojure@9.5
+        uses: DeLaGuardo/setup-clojure@10.2
         with:
           cli: 1.11.1.1165 # Clojure CLI based on tools.deps
 

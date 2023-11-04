@@ -6,6 +6,7 @@
             [myuri.model :as model]
             [myuri.web.auth.views :as av]
             [myuri.web.utils :refer [is-post?]]
+            [ring.util.codec :refer [url-decode url-encode]]
             [ring.util.response :as resp]))
 
 
@@ -24,19 +25,21 @@
     (av/login-view req)
     (let [{:keys [username password]} (:params req)]
       (if-let [user (check-user-password ds username password)]
-        (-> (resp/redirect "/")
-            (assoc :session {:identity {:id       (:users/id user)
-                                        :username (:users/username user)
-                                        :email    (:users/email user)}}))
+        (let [to (-> req :params :to)
+              next (if to
+                     (url-decode to)
+                     "/")]
+          (-> (resp/redirect next)
+              (assoc :session {:identity {:id       (:users/id user)
+                                          :username (:users/username user)
+                                          :email    (:users/email user)}})))
         (av/login-view req true)))))
 
 (defn token-auth
   "docstring"
   [ds]
   (fn [req token]
-    (println "trying to authenticate using token" token)
     (when-let [user (db/user-by-token ds token)]
-      (println "authenticated" user)
       {:id       (:users/id user)
        :username (:users/username user)
        :email    (:users/email user)})))
@@ -72,7 +75,7 @@
       (if-let [errors (validate-model User-Registration user)]
         (av/register-view (assoc req :validation/errors errors))
         (do
-          (model/create-user ds nil user)
+          (model/create-user! ds nil user)
           (resp/redirect "/auth/login"))))))
 
 
@@ -80,4 +83,5 @@
 (defn unauthorized-handler
   "Default action on unauthorized event -> redirect to login-page"
   [req _]
-  (resp/redirect (str "/auth/login")))
+  (let [redirect (url-encode (str (:uri req) "?" (:query-string req)))]
+    (resp/redirect (str "/auth/login?to=" redirect))))

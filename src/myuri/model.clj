@@ -10,7 +10,7 @@
 
 ;; Users ----------------------------------------------------------------------
 
-(defn insert-user
+(defn insert-user!
   "Creates new user record"
   [ds user]
   (let [user-record (-> user
@@ -22,7 +22,7 @@
          (jdbc/execute-one! ds))))
 
 (defn get-account
-  "Creates new user record"
+  "Fetches a user account either by username or email"
   [ds username]
   (if (clojure.string/includes? username "@")
     (sql/get-by-id ds :users username :email nil)
@@ -35,13 +35,13 @@
   (mailer-fn {:to   (:email user)
               :body (format "Please confirm your account registration http://localhost:3000/auth/confirm?code=%s" (:verification_code user))}))
 
-(defn create-user
+(defn create-user!
   "docstring"
   [ds mailer user]
   (let [code (random-uuid)
         user (assoc user :verification_code code)]
     (jdbc/with-transaction [tx ds]
-                           (insert-user tx user)
+                           (insert-user! tx user)
                            (send-verification-mail (fn [data])
                                                    user))))
 
@@ -110,6 +110,4 @@
                   (hh/do-update-set :json_value)
                   (hh/returning :*)
                   hsql/format)]
-    (println values)
-     (println stat)
      (jdbc/execute! ds stat))))

@@ -6,6 +6,7 @@
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
             [ring.middleware.json :refer [wrap-json-response wrap-json-params]]
             [ring.middleware.reload :refer [wrap-reload]]
+            [ring.middleware.cors :refer [wrap-cors]]
             [ring.middleware.session.cookie :refer [cookie-store]]
 
             [myuri.web.auth.handler :refer [unauthorized-handler token-auth]]))
@@ -14,7 +15,7 @@
 
 (defn token-backend
   [ds]
-  (backends/token {:authfn token-auth}))
+  (backends/token {:authfn (token-auth ds)}))
 
 (def authz-rules [{:pattern #"^/auth/.*" :handler (constantly true)} ; Let everyone use the auth endpoints
                   {:pattern #"^/.*" :handler authenticated?}])
@@ -49,10 +50,12 @@
   "docstring"
   [handler opts]
   (-> handler
-      (wrap-auth authz-rules cookie-backend (token-backend (:ds opts)))
+      (wrap-auth authz-rules
+                 cookie-backend
+                 (token-backend (:ds opts)))
       (wrap-system opts)
       (wrap-site-defaults opts)
-      #_(wrap-cors :access-control-allow-origin #".*"
+      (wrap-cors :access-control-allow-origin #".*"
                    :access-control-allow-methods [:get :put :post :delete])
       (wrap-json-params {:keywords? true :bigdecimals? true})
       (wrap-json-response)
