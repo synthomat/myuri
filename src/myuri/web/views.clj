@@ -3,7 +3,9 @@
     [buddy.auth :refer [authenticated?]]
     [hiccup.page :as hp]
     [myuri.web.utils :as u]
-    [ring.util.response :as resp]))
+    [ring.util.response :as resp])
+  (:import (java.net URL)
+           (java.util.jar Manifest)))
 
 
 (defn bookmarklet-address
@@ -77,11 +79,22 @@
   [:div
    (navigation req)])
 
+(defn version
+  "docstring"
+  []
+  (when-let [loc (-> (.getProtectionDomain (class *ns*)) .getCodeSource .getLocation)]
+  (-> (str "jar:" loc "!/META-INF/MANIFEST.MF")
+      URL. .openStream Manifest. .getMainAttributes
+      (.getValue "Build-Number"))))
+
+(def get-version (memoize version))
+
 (defn layout
   "Layout with Header (Navigation), etc..."
   [req & children]
-
   (site req
         (header req)
         [:div.container.container-expand
-         children]))
+         children]
+        (when-let [vers (get-version)]
+          [:div {:style "text-align: center; margin-top: 50px; color: #ccc;"} "v" vers])))

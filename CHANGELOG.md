@@ -1,9 +1,15 @@
 # Change Log
 All notable changes to this project will be documented in this file. This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
-## [0.8] – UNRELEASED
+
+## [0.9] – UNRELEASED
+
+## [0.8] – 2023-11-04
 ### Changed
 * The search now considers both site title and url
+
+### Added
+* When user is unauthenticated, the login process will redirect the user to the original URL after successful login
 
 ## [0.7] – 2023-04-05
 ### Added
