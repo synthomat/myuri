@@ -13,6 +13,7 @@
            ring-cors/ring-cors              {:mvn/version "0.1.13"}
            bidi/bidi                        {:mvn/version "2.1.6"} ; Routing
            hiccup/hiccup                    {:mvn/version "1.0.5"} ; HTML Templating
+           selmer/selmer                    {:mvn/version "1.12.59"}
 
            ;; Authn & Authz ---------------------------------------------------
            buddy/buddy-auth                 {:mvn/version "3.0.323"}

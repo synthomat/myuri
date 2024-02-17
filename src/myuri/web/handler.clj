@@ -55,7 +55,6 @@
                                                           :post bh/api-create-bookmark-handler}
                                                ["/" :id] {:get   (-> bh/api-bookmark-handler inject-bookmark)
                                                           :patch (-> bh/api-update-bookmark-handler inject-bookmark)}}
-                            "collections"     {"" bh/api-collections-handler}
                             ["user/settings"] {:put {"" sh/config-toggle-handler}}}
 
         true               not-found-handler}])
