@@ -90,15 +90,6 @@
                           left join users u on u.id = at.user_id
                           where at.token = ?" token]))
 
-(defn collections-by-user
-  "docstring"
-  [ds user-id]
-  (let [user-uuid (parse-uuid user-id)]
-    (sql/query ds ["select * from collections
-                  where user_id = ?
-                  order by name" user-uuid]))
-  )
-
 ;; Database Management --------------------------------------------------------
 
 (defn migratus-config

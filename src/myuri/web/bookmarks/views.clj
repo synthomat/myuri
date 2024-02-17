@@ -1,13 +1,14 @@
 (ns myuri.web.bookmarks.views
   (:require [myuri.web.utils :as u]
             [myuri.web.views :as l]
-            [ring.util.anti-forgery :refer [anti-forgery-field]])
+            [ring.util.anti-forgery :refer [anti-forgery-field]]
+            [selmer.parser :refer [render-file]])
   (:import (java.text SimpleDateFormat)))
 
 
 (defn new-bookmark-view
   "docstring"
-  [req collections]
+  [req]
   (let [{:keys [su st p]} (-> req :params)
         frame (if p l/site l/layout)]
 
@@ -83,11 +84,16 @@
         " | "
         [:a {:href (format "/bookmarks/%s" (-> bm :id str)) :hx-target "closest div.bm-item" :hx-swap "delete" :hx-delete (format "/bookmarks/%s" (-> bm :id str))} "delete"]]])))
 
+(selmer.parser/set-resource-path! (clojure.java.io/resource "templates"))
+
 
 (defn index-view
   "docstring"
   [req {:keys [bookmarks collections]}]
-  (l/layout req
+  (->      (render-file "index.html" {:bookmarks bookmarks})
+           ring.util.response/response
+           (ring.util.response/content-type "text/html"))
+  #_(l/layout req
             [:div.container {:style "margin-top: 30px;"}
              #_[:div.select
                 [:select {:name "collection_selector"}

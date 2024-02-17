@@ -4,6 +4,7 @@
             [myuri.web.bookmarks.views :as v]
             [myuri.web.utils :refer [is-post? user-id]]
             [myuri.web.views :as l]
+            [clj-http.client :as http]
             [ring.util.response :as resp]))
 
 ;; Handlers -------------------------------------------------------------------
@@ -73,18 +74,10 @@
     (if-let [res (db/store! ds mapped)]
       (json-resp (model->bm res)))))
 
-(defn api-collections-handler
-  [{:keys [ds] :as req}]
-  (let [collections (db/collections-by-user ds (str (user-id req)))]
-    (-> (json-resp (map model->col collections))
-        (resp/header "X-Total-Count" (count collections)))))
-
 (defn index-handler
   [req]
-  (let [bookmarks (-> (api-index-handler req) :body)
-        collections (-> (api-collections-handler req) :body)]
-    (v/index-view req {:bookmarks   bookmarks
-                       :collections collections})))
+  (let [bookmarks (-> (api-index-handler req) :body)]
+    (v/index-view req {:bookmarks   bookmarks})))
 
 
 (defn create-bookmark
@@ -98,12 +91,12 @@
   "docstring"
   [{:keys [ds] :as req}]
   (if-not (is-post? req)
-    (let [collections (db/collections-by-user ds (str (user-id req)))]
-      (v/new-bookmark-view req collections))
-    (let [{:keys [su st p]} (:params req)
+    (v/new-bookmark-view req)
+    (let [{:keys [su st p] :as bm} (:params req)
           user-id (user-id req)]
-      (create-bookmark ds user-id {:url   su
-                                   :title st})
+      (when (create-bookmark ds user-id {:url   su
+                                       :title st})
+        (future (println "Getting meta" bm)))
       (if (= p "1")
         (l/site req
                 [:h2 "You may close this popup now"]
