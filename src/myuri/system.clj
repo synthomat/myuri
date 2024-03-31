@@ -3,9 +3,9 @@
             [myuri.web.server :as server]
             [com.stuartsierra.component :as component]))
 
-(defn new-system [config-options]
-  (let [{:keys [database server]} config-options]
+(defn new-system [config]
+  (let [{:keys [database server]} config]
     (component/system-map
       :db (db/new-database database)
       :server (component/using (server/new-server server)
-                               {:db :db}))))
+                               [:db]))))

@@ -8,7 +8,8 @@
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.middleware.cors :refer [wrap-cors]]
             [ring.middleware.session.cookie :refer [cookie-store]]
-
+            [ring.util.response :as resp]
+            [selmer.parser :refer [render-file]]
             [myuri.web.auth.handler :refer [unauthorized-handler token-auth]]))
 
 (def cookie-backend (backends/session {:unauthorized-handler unauthorized-handler}))
@@ -46,6 +47,18 @@
                      (assoc-in [:security :anti-forgery] false))]
     (wrap-defaults handler defaults)))
 
+(defn template-middleware
+  "docstring"
+  [handler]
+  (fn [req]
+    (let [res (handler req)]
+      (if-let [{:keys [template data]} (:selmer res)]
+        (-> (render-file template data)
+            resp/response
+            (resp/content-type "text/html")
+            (merge res))
+        res))))
+
 (defn wrap-middlewares
   "docstring"
   [handler opts]
@@ -53,10 +66,11 @@
       (wrap-auth authz-rules
                  cookie-backend
                  (token-backend (:ds opts)))
+      (template-middleware)
       (wrap-system opts)
       (wrap-site-defaults opts)
       (wrap-cors :access-control-allow-origin #".*"
-                   :access-control-allow-methods [:get :put :post :delete])
+                 :access-control-allow-methods [:get :put :post :delete])
       (wrap-json-params {:keywords? true :bigdecimals? true})
       (wrap-json-response)
       (wrap-reload)))

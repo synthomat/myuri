@@ -12,7 +12,6 @@
            ring/ring-json                   {:mvn/version "0.5.1"}
            ring-cors/ring-cors              {:mvn/version "0.1.13"}
            bidi/bidi                        {:mvn/version "2.1.6"} ; Routing
-           hiccup/hiccup                    {:mvn/version "1.0.5"} ; HTML Templating
            selmer/selmer                    {:mvn/version "1.12.59"}
 
            ;; Authn & Authz ---------------------------------------------------
@@ -29,8 +28,8 @@
            cheshire/cheshire                {:mvn/version "5.12.0"} ; JSON Lib
            com.draines/postal               {:mvn/version "2.0.5"} ; SMTP Client
            metosin/malli                    {:mvn/version "0.13.0"} ; Validation
-           clj-http/clj-http                {:mvn/version "3.12.3"} ; HTTP Client
-           org.clj-commons/hickory          {:mvn/version "0.7.3"} ; HTML parser
+           ;clj-http/clj-http                {:mvn/version "3.12.3"} ; HTTP Client
+           ;org.clj-commons/hickory          {:mvn/version "0.7.3"} ; HTML parser
            }
 
 
@@ -47,4 +46,4 @@
                    :extra-deps  {org.clojure/test.check {:mvn/version "1.1.1"}
                                  io.github.cognitect-labs/test-runner
                                  {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
-                   :exec-fn     cognitect.test-runner.api/test}}}
+                   :exec-fn     cognitect.test-runner.api/test}}} 

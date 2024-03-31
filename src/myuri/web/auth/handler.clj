@@ -4,10 +4,12 @@
             [malli.error :as me]
             [myuri.db :as db]
             [myuri.model :as model]
-            [myuri.web.auth.views :as av]
             [myuri.web.utils :refer [is-post?]]
+            [next.jdbc.sql :as sql]
             [ring.util.codec :refer [url-decode url-encode]]
-            [ring.util.response :as resp]))
+            [ring.util.response :as resp]
+            [selmer.parser :refer [render-file]]
+            ))
 
 
 (defn check-user-password
@@ -20,20 +22,25 @@
 
 (defn login-handler
   "docstring"
-  [{:keys [ds] :as req}]
+  [{:keys                          [ds] :as req
+    {:keys [username password to]} :params}]
   (if-not (is-post? req)
-    (av/login-view req)
-    (let [{:keys [username password]} (:params req)]
-      (if-let [user (check-user-password ds username password)]
-        (let [to (-> req :params :to)
-              next (if to
-                     (url-decode to)
-                     "/")]
-          (-> (resp/redirect next)
-              (assoc :session {:identity {:id       (:users/id user)
-                                          :username (:users/username user)
-                                          :email    (:users/email user)}})))
-        (av/login-view req true)))))
+    (-> (render-file "auth/login.html" {:req req})
+        (resp/response)
+        (resp/content-type "text/html"))
+    (if-let [user (check-user-password ds username password)]
+      (let [next (url-decode (or (not-empty to) "/"))
+            identity {:id       (:users/id user)
+                      :username (:users/username user)
+                      :email    (:users/email user)}]
+        (-> (resp/redirect next)
+            (assoc :session {:identity identity})))
+      (-> (render-file "auth/login.html" {:req      req
+                                          :username username
+                                          :password password
+                                          :error    true})
+          (resp/response)
+          (resp/content-type "text/html")))))
 
 (defn token-auth
   "docstring"
@@ -51,12 +58,13 @@
       (assoc :session (dissoc session :identity))))
 
 (def User-Registration
-  (malli/schema [:map
-                 [:username [:fn {:error/message "Username must consist of lowercase a-z, 0-9, '-', '_' and should be 3-20 characters long"}
-                             (partial re-matches #"^[a-z0-9\-_]{3,20}$")]]
-                 [:email [:fn {:error/message "Please provide a valid email address"}
-                          (partial re-matches #"^.+@.{2,}\..{2,}$")]]
-                 [:password [:string {:min 10}]]]))
+  (malli/schema
+    [:map
+     [:username [:fn {:error/message "Username must consist of lowercase a-z, 0-9, '-', '_' and should be 3-20 characters long"}
+                 (partial re-matches #"^[a-z0-9\-_]{3,20}$")]]
+     [:email [:fn {:error/message "Please provide a valid email address"}
+              (partial re-matches #"^.+@.{2,}\..{2,}$")]]
+     [:password [:string {:min 10}]]]))
 
 (defn validate-model
   "docstring"
@@ -70,13 +78,23 @@
   [{:keys [ds params] :as req}]
 
   (if-not (is-post? req)
-    (av/register-view req)
+    (-> (render-file "auth/register.html" {:req req})
+        (resp/response)
+        (ring.util.response/content-type "text/html"))
     (let [user (select-keys params [:username :email :password])]
       (if-let [errors (validate-model User-Registration user)]
-        (av/register-view (assoc req :validation/errors errors))
-        (do
-          (model/create-user! ds nil user)
-          (resp/redirect "/auth/login"))))))
+        (-> (render-file "auth/register.html" {:req (assoc req :validation/errors errors)})
+            (resp/response)
+            (ring.util.response/content-type "text/html"))
+
+        (if (model/user-exists? ds user)
+          (-> (render-file "auth/register.html" {:req   req
+                                                 :error "The provided username or email address already exist."})
+              (resp/response)
+              (ring.util.response/content-type "text/html"))
+          (do
+            (model/create-user! ds nil user)
+            (resp/redirect "/auth/login")))))))
 
 
 

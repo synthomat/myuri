@@ -1,0 +1,40 @@
+{% extends "_master.html" %}
+
+{% block page %}
+<div class="container">
+    <h3 class="title is3">Register</h3>
+
+    {% if error %}
+    <div class="notification is-danger is-light"><strong>⚠️ Registration failed:</strong> {{ error }}
+    </div>
+    {% endif %}
+
+    <form action="/auth/register" method="post">
+        <input type="hidden" name="to" value="{{ to }}">
+        {% with err=req.validation/errors %}
+        <div class="field">
+            <label for="" class="label">Username</label>
+            <div class="control"><input type="text" class="input" name="username" value="{{req.params.username}}" required/></div>
+            {% if err %}<p class="help is-danger">{% for ve in err.username %}{{ ve }}; {% endfor %}</p>{% endif %}
+        </div>
+
+        <div class="field">
+            <label for="" class="label">Email</label>
+            <div class="control"><input type="email" class="input" name="email" value="{{req.params.email}}" required/></div>
+            {% if err %}<p class="help is-danger">{% for ve in err.email %}{{ ve }}; {% endfor %}</p>{% endif %}
+        </div>
+
+        <div class="field">
+            <label for="" class="label">Password</label>
+            <div class="control"><input type="password" class="input" name="password" required/></div>
+            {% if err %}<p class="help is-danger">{% for ve in err.password %}{{ ve }}; {% endfor %}</p>{% endif %}
+        </div>
+        {% endwith %}
+
+        <div class="field">
+            <div class="control"><input type="submit" class="button is-link" value="register"> or <a href="/auth/login">log
+                in</a></div>
+        </div>
+    </form>
+</div>
+{% endblock %}
