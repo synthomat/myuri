@@ -1,19 +1,17 @@
 (ns myuri.web.middleware
   (:require [buddy.auth :refer [authenticated?]]
             [buddy.auth.accessrules :as baa]
-            [buddy.auth.backends :as backends]
+            [buddy.auth.backends]
             [buddy.auth.backends :as bab]
             [buddy.auth.middleware :as bam]
-            [myuri.web.auth.handler :refer [token-auth unauthorized-handler]]
+            [myuri.web.auth.handler :refer [unauthorized-handler]]
             [ring.middleware.session.cookie :refer [cookie-store]]
+            [ring.middleware.session :as rms]
             [ring.util.response :as resp]
             [selmer.parser :refer [render-file]]))
 
 (def cookie-backend (bab/session {:unauthorized-handler unauthorized-handler}))
 
-(defn token-backend
-  [ds]
-  (backends/token {:authfn (token-auth ds)}))
 
 (def authz-rules [{:pattern #"^/auth/.*" :handler (constantly true)} ; Let everyone use the auth endpoints
                   {:pattern #"^/.*" :handler authenticated?}])
@@ -57,4 +55,4 @@
 (defn wrap-session
   "docstring"
   [handler key]
-  (ring.middleware.session/wrap-session handler {:store (cookie-store {:key key})}))
+  (rms/wrap-session handler {:store (cookie-store {:key key})}))

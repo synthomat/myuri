@@ -23,6 +23,14 @@
   {:selmer {:template template
             :data     data}})
 
+
+(defn make-identity
+  "docstring"
+  [user]
+  {:id       (:users/id user)
+   :username (:users/username user)
+   :email    (:users/email user)})
+
 (defn login-handler-post
   "docstring"
   [{:keys                                  [ds] :as req
@@ -30,9 +38,7 @@
   (prn username password to)
   (if-let [user (check-user-password ds username password)]
     (let [next (url-decode (or (not-empty to) "/"))
-          identity {:id       (:users/id user)
-                    :username (:users/username user)
-                    :email    (:users/email user)}]
+          identity (make-identity user)]
       (-> (resp/redirect next)
           (assoc :session {:identity identity})))
     (tpl-resp "auth/login.html" {:req      req
@@ -46,15 +52,6 @@
     {{:keys [to]} :query} :parameters}]
   (tpl-resp "auth/login.html" {:req req}))
 
-
-(defn token-auth
-  "docstring"
-  [ds]
-  (fn [req token]
-    (when-let [user (db/user-by-token ds token)]
-      {:id       (:users/id user)
-       :username (:users/username user)
-       :email    (:users/email user)})))
 
 (defn logout-handler
   "docstring"
@@ -83,20 +80,15 @@
   [{:keys [ds params] :as req}]
 
   (if-not (is-post? req)
-    (-> (render-file "auth/register.html" {:req req})
-        (resp/response)
-        (ring.util.response/content-type "text/html"))
+    (tpl-resp "auth/register.html" {:req req})
+
     (let [user (select-keys params [:username :email :password])]
       (if-let [errors (validate-model User-Registration user)]
-        (-> (render-file "auth/register.html" {:req (assoc req :validation/errors errors)})
-            (resp/response)
-            (ring.util.response/content-type "text/html"))
+        (tpl-resp "auth/register.html" {:req (assoc req :validation/errors errors)})
 
         (if (model/user-exists? ds user)
-          (-> (render-file "auth/register.html" {:req   req
-                                                 :error "The provided username or email address already exist."})
-              (resp/response)
-              (ring.util.response/content-type "text/html"))
+          (tpl-resp "auth/register.html" {:req   req
+                                          :error "The provided username or email address already exist."})
           (do
             (model/create-user! ds nil user)
             (resp/redirect "/auth/login")))))))

@@ -80,11 +80,13 @@
                        "new-bookmark.html"
                        "new-bookmark.html")
                      {:req (assoc req :authenticated true)})
-      (let [{:keys [su st p] :as bm} (:params req)
+      (let [su (get params "su")
+            st (get params "st")
+            p (get params "p")
             user-id (user-id req)]
         (when (create-bookmark ds user-id {:url   su
                                            :title st})
-          (future (println "Getting meta" bm)))
+          (future (println "Getting meta" su)))
         (if (= p "1")
           (html-response "index.html" nil)
           #_(l/site req

@@ -1,20 +1,19 @@
 (ns myuri.web.routes
   (:require
-    [reitit.ring :as ring]
     [muuntaja.core :as mj]
-    [reitit.ring.coercion :as rrc]
-    [reitit.ring.middleware.muuntaja :as muuntaja]
-    [ring.middleware.session :refer [wrap-session]]
-    [reitit.ring.middleware.parameters :as parameters]
     [myuri.model :as m]
-    [reitit.coercion.malli]
     [myuri.web.auth.handler :as ah]
     [myuri.web.handler :as bh]
     [myuri.web.middleware :as mw]
     [myuri.web.utils :as u]
-    [selmer.parser :refer [render-file]]
-
-    [ring.util.response :as resp]))
+    [reitit.coercion.malli]
+    [reitit.ring :as ring]
+    [reitit.ring.coercion :as rrc]
+    [reitit.ring.middleware.muuntaja :as muuntaja]
+    [reitit.ring.middleware.parameters :as parameters]
+    [reitit.ring.middleware.exception :as exception]
+    [ring.util.response :as resp]
+    [selmer.parser :refer [render-file]]))
 
 ;; Utils ----------------------------------------------------------------------
 
@@ -36,7 +35,12 @@
 
       (if-let [bookmark (m/bookmark-by-id ds user-id bm-id)]
         (handler (assoc req :bookmark bookmark))
-        (-> (resp/not-found {:message (format "Could not find bookmark: %s" bm-id)}))))))
+        (resp/not-found nil)))))
+
+(def default-routes
+  (ring/routes
+    (ring/create-resource-handler {:path "/assets"})
+    (ring/create-default-handler {:not-found not-found-handler})))
 
 (defn app
   [opts]
@@ -70,17 +74,11 @@
                            rrc/coerce-request-middleware
                            muuntaja/format-response-middleware
                            rrc/coerce-response-middleware
+                           exception/exception-middleware
 
                            mw/wrap-template-response]}})
 
-    (ring/routes
-      (ring/create-resource-handler {:path "/assets"})
-      (ring/create-default-handler))
+    default-routes
 
     {:middleware [[mw/wrap-session (:cookie-secret opts)]
                   [mw/wrap-system opts]]}))
-
-
-(defn new-handler
-  [opts]
-  (app opts))
