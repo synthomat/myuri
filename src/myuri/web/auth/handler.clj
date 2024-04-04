@@ -35,7 +35,6 @@
   "docstring"
   [{:keys                                  [ds] :as req
     {{:keys [username password to]} :form} :parameters}]
-  (prn username password to)
   (if-let [user (check-user-password ds username password)]
     (let [next (url-decode (or (not-empty to) "/"))
           identity (make-identity user)]

@@ -11,11 +11,16 @@
 
   (start [this]
     (log/info "Starting ServerComponent")
-    (let [{:keys [cookie-secret port]} options
+    (let [{:keys [cookie-secret port dev?]} options
           create-handler #(routes/app {:ds            (:ds db)
                                        :cookie-secret cookie-secret})
-          server (j/run-jetty (ring/reloading-ring-handler create-handler)
-                              {:port port :join? false})]
+          handler (if dev?
+                    (do
+                      (log/info "Starting server in debug mode (auto-reload enabled)")
+                      (ring/reloading-ring-handler create-handler))
+                    (create-handler))
+
+          server (j/run-jetty handler {:port port :join? false})]
       (assoc this :server server)))
 
   (stop [this]

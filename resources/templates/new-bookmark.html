@@ -6,16 +6,17 @@
     <h3 class="is-size-3">Add Bookmark</h3>
     <div style="padding: 10px">
         <form action="/new" method="post">
+            <input type="hidden" name="p" value="{{ p }}" />
             <div class="field">
                 <label for="" class="label">URL</label>
                 <div class="control">
-                    <input type="text" class="input" name="su" value="{{bm.bookmarks/site_url}}" required />
+                    <input type="text" class="input" name="su" value="{{su}}" required />
                 </div>
             </div>
             <div class="field">
                 <label for="" class="label">Title</label>
                 <div class="control">
-                    <input type="text" class="input" name="st" value="{{bm.bookmarks/site_title}}" />
+                    <input type="text" class="input" name="st" value="{{st}}" />
                 </div>
             </div>
             <div class="field">

@@ -73,25 +73,25 @@
 (defn new-bookmark-handler
   "docstring"
   [{:keys [ds params] :as req}]
-  (let [p (:p params)]
+  (let [p (:p params)
+        su (get params "su")
+        st (get params "st")
+        p (get params "p")]
 
     (if-not (is-post? req)
       (html-response (if p
                        "new-bookmark.html"
                        "new-bookmark.html")
-                     {:req (assoc req :authenticated true)})
-      (let [su (get params "su")
-            st (get params "st")
-            p (get params "p")
-            user-id (user-id req)]
+                     {:req (assoc req :authenticated true)
+                      :su su
+                      :st st
+                      :p p})
+      (let [user-id (user-id req)]
         (when (create-bookmark ds user-id {:url   su
                                            :title st})
           (future (println "Getting meta" su)))
         (if (= p "1")
-          (html-response "index.html" nil)
-          #_(l/site req
-                    [:h2 "You may close this popup now"]
-                    [:script "window.onload = window.close"])
+          (tpl-resp "close-window.html" nil)
           (resp/redirect "/"))))))
 
 (defn edit-bookmark-handler
@@ -103,7 +103,7 @@
     (let [su (get params "su")
           st (get params "st")]
       (m/update-bookmark ds (:bookmarks/id bookmark) {:site_title st
-                                            :site_url   su})
+                                                      :site_url   su})
       (resp/redirect "/"))))
 
 

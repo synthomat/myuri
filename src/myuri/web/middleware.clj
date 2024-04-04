@@ -5,8 +5,8 @@
             [buddy.auth.backends :as bab]
             [buddy.auth.middleware :as bam]
             [myuri.web.auth.handler :refer [unauthorized-handler]]
-            [ring.middleware.session.cookie :refer [cookie-store]]
             [ring.middleware.session :as rms]
+            [ring.middleware.session.cookie :as cookie]
             [ring.util.response :as resp]
             [selmer.parser :refer [render-file]]))
 
@@ -51,8 +51,12 @@
             (merge res))
         res))))
 
+(defn cookie-store
+  [key]
+  (let [byte-key (byte-array (map byte key))]
+    (cookie/cookie-store {:key byte-key})))
 
 (defn wrap-session
   "docstring"
   [handler key]
-  (rms/wrap-session handler {:store (cookie-store {:key key})}))
+  (rms/wrap-session handler {:store (cookie-store key)}))
