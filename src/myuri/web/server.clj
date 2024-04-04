@@ -2,6 +2,7 @@
   (:require [clojure.tools.logging :as log]
             [com.stuartsierra.component :as component]
             [myuri.web.routes :as routes]
+            [reitit.ring :as ring]
             [ring.adapter.jetty :as j]))
 
 
@@ -11,9 +12,10 @@
   (start [this]
     (log/info "Starting ServerComponent")
     (let [{:keys [cookie-secret port]} options
-          handler (routes/new-handler {:ds            (:ds db)
+          create-handler #(routes/app {:ds            (:ds db)
                                        :cookie-secret cookie-secret})
-          server (j/run-jetty handler {:port port :join? false})]
+          server (j/run-jetty (ring/reloading-ring-handler create-handler)
+                              {:port port :join? false})]
       (assoc this :server server)))
 
   (stop [this]

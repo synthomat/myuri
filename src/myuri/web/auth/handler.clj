@@ -5,11 +5,9 @@
             [myuri.db :as db]
             [myuri.model :as model]
             [myuri.web.utils :refer [is-post?]]
-            [next.jdbc.sql :as sql]
             [ring.util.codec :refer [url-decode url-encode]]
             [ring.util.response :as resp]
-            [selmer.parser :refer [render-file]]
-            ))
+            [selmer.parser :refer [render-file]]))
 
 
 (defn check-user-password
@@ -19,28 +17,35 @@
     (when (hashers/check password (get user :users/password_digest))
       (dissoc user :users/password_digest))))
 
-
-(defn login-handler
+(defn tpl-resp
   "docstring"
-  [{:keys                          [ds] :as req
-    {:keys [username password to]} :params}]
-  (if-not (is-post? req)
-    (-> (render-file "auth/login.html" {:req req})
-        (resp/response)
-        (resp/content-type "text/html"))
-    (if-let [user (check-user-password ds username password)]
-      (let [next (url-decode (or (not-empty to) "/"))
-            identity {:id       (:users/id user)
-                      :username (:users/username user)
-                      :email    (:users/email user)}]
-        (-> (resp/redirect next)
-            (assoc :session {:identity identity})))
-      (-> (render-file "auth/login.html" {:req      req
-                                          :username username
-                                          :password password
-                                          :error    true})
-          (resp/response)
-          (resp/content-type "text/html")))))
+  [template data]
+  {:selmer {:template template
+            :data     data}})
+
+(defn login-handler-post
+  "docstring"
+  [{:keys                                  [ds] :as req
+    {{:keys [username password to]} :form} :parameters}]
+  (prn username password to)
+  (if-let [user (check-user-password ds username password)]
+    (let [next (url-decode (or (not-empty to) "/"))
+          identity {:id       (:users/id user)
+                    :username (:users/username user)
+                    :email    (:users/email user)}]
+      (-> (resp/redirect next)
+          (assoc :session {:identity identity})))
+    (tpl-resp "auth/login.html" {:req      req
+                                 :username username
+                                 :password password
+                                 :error    true})))
+
+(defn login-handler-get
+  "docstring"
+  [{:keys                 [ds] :as req
+    {{:keys [to]} :query} :parameters}]
+  (tpl-resp "auth/login.html" {:req req}))
+
 
 (defn token-auth
   "docstring"
@@ -51,7 +56,7 @@
        :username (:users/username user)
        :email    (:users/email user)})))
 
-(defn logout
+(defn logout-handler
   "docstring"
   [{session :session}]
   (-> (resp/redirect "/auth/login")                         ; Redirect to login

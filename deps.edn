@@ -11,7 +11,7 @@
            ring/ring-devel                  {:mvn/version "1.10.0"}
            ring/ring-json                   {:mvn/version "0.5.1"}
            ring-cors/ring-cors              {:mvn/version "0.1.13"}
-           bidi/bidi                        {:mvn/version "2.1.6"} ; Routing
+           metosin/reitit                   {:mvn/version "0.7.0-alpha7"}
            selmer/selmer                    {:mvn/version "1.12.59"}
 
            ;; Authn & Authz ---------------------------------------------------
@@ -28,6 +28,7 @@
            cheshire/cheshire                {:mvn/version "5.12.0"} ; JSON Lib
            com.draines/postal               {:mvn/version "2.0.5"} ; SMTP Client
            metosin/malli                    {:mvn/version "0.13.0"} ; Validation
+
            ;clj-http/clj-http                {:mvn/version "3.12.3"} ; HTTP Client
            ;org.clj-commons/hickory          {:mvn/version "0.7.3"} ; HTML parser
            }

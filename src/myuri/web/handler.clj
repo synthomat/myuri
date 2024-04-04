@@ -94,31 +94,24 @@
 
 (defn edit-bookmark-handler
   "docstring"
-  [{:keys [ds params] :as req}]
-  (let [bookmark-id (-> params :id parse-uuid)
-        user-id (user-id req)]
-    (if-let [bm (m/bookmark-by-id ds user-id bookmark-id)]
-      (if-not (is-post? req)
-        (html-response "edit-bookmark.html" {:req (assoc req :authenticated true)
-                                             :bm  bm})
-        (let [{:keys [su st]} (:params req)]
-          (m/update-bookmark ds bookmark-id {:bookmarks/site_title st
-                                             :bookmarks/site_url   su})
-          (resp/redirect "/")))
-
-
-      (-> (html-response "error-404.html" nil)
-          (resp/status 404)))))
+  [{:keys [ds bookmark params] :as req}]
+  (if-not (is-post? req)
+    (html-response "edit-bookmark.html" {:req (assoc req :authenticated true)
+                                         :bm  bookmark})
+    (let [su (get params "su")
+          st (get params "st")]
+      (m/update-bookmark ds (:bookmarks/id bookmark) {:site_title st
+                                            :site_url   su})
+      (resp/redirect "/"))))
 
 
 (defn delete-bookmark-handler
   "docstring"
-  [{:keys [ds params] :as req}]
-  (let [bookmark-id (-> params :id parse-uuid)]
-    (if (db/delete! ds (user-id req) bookmark-id)
-      (resp/status 200)
-      (-> (resp/response "Something bad happened")
-          (resp/status 500)))))
+  [{:keys [ds bookmark params] :as req}]
+  (if (db/delete! ds (user-id req) (:bookmarks/id bookmark))
+    (resp/status 200)
+    (-> (resp/response "Something bad happened")
+        (resp/status 500))))
 
 
 (defn send-json-file
