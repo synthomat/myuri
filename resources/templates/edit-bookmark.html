@@ -6,6 +6,7 @@
     <h3 class="is-size-3">Edit Bookmark</h3>
     <div style="padding: 10px">
         <form action="/bookmarks/{{ bm.bookmarks/id }}/edit" method="post">
+            <input type="hidden" name="__anti-forgery-token" value="{{ req.anti-forgery-token }}">
             <div class="field">
                 <label for="" class="label">URL</label>
                 <div class="control">

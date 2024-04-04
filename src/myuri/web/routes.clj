@@ -7,6 +7,8 @@
     [myuri.web.middleware :as mw]
     [myuri.web.utils :as u]
     [reitit.coercion.malli]
+    [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
+
     [reitit.ring :as ring]
     [reitit.ring.coercion :as rrc]
     [reitit.ring.middleware.muuntaja :as muuntaja]
@@ -66,7 +68,8 @@
       ;; router data affecting all routes
       {:data {:coercion   reitit.coercion.malli/coercion
               :muuntaja   mj/instance
-              :middleware [mw/wrap-authentication
+              :middleware [
+                           mw/wrap-authentication
                            mw/wrap-authorization
                            mw/wrap-access-rules
 
@@ -75,6 +78,7 @@
                            muuntaja/format-response-middleware
                            rrc/coerce-response-middleware
                            exception/exception-middleware
+                           wrap-anti-forgery
 
                            mw/wrap-template-response]}})
 

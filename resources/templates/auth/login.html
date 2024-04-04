@@ -10,6 +10,7 @@
 
     <form action="/auth/login" method="post">
         <input type="hidden" name="to" value="{{ req.params.to }}">
+        <input type="hidden" name="__anti-forgery-token" value="{{ req.anti-forgery-token }}" />
 
         <div class="field">
             <label for="" class="label">Username</label>
