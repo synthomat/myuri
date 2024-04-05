@@ -8,7 +8,8 @@
             [ring.middleware.session :as rms]
             [ring.middleware.session.cookie :as cookie]
             [ring.util.response :as resp]
-            [selmer.parser :refer [render-file]]))
+            [selmer.parser :refer [render-file]]
+            [myuri.web.utils :as u]))
 
 (def cookie-backend (bab/session {:unauthorized-handler unauthorized-handler}))
 
@@ -43,12 +44,14 @@
   "docstring"
   [handler]
   (fn [req]
-    (let [res (handler req)]
-      (if-let [{:keys [template data]} (:selmer res)]
-        (-> (render-file template data)
+    (let [res (handler req)
+          {{:keys [template data]} :selmer :as selm} res
+          app-addr (u/app-address req)]
+      (if selm
+        (-> (render-file template (merge {:app-addr app-addr}
+                                         data))
             resp/response
-            (resp/content-type "text/html")
-            (merge res))
+            (resp/content-type "text/html"))
         res))))
 
 (defn cookie-store

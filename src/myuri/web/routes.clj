@@ -6,14 +6,14 @@
     [myuri.web.handler :as bh]
     [myuri.web.middleware :as mw]
     [myuri.web.utils :as u]
-    [reitit.coercion.malli]
-    [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
 
+    [reitit.coercion.malli]
     [reitit.ring :as ring]
     [reitit.ring.coercion :as rrc]
+    [reitit.ring.middleware.exception :as exception]
     [reitit.ring.middleware.muuntaja :as muuntaja]
     [reitit.ring.middleware.parameters :as parameters]
-    [reitit.ring.middleware.exception :as exception]
+    [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
     [ring.util.response :as resp]
     [selmer.parser :refer [render-file]]))
 
@@ -48,13 +48,12 @@
   [opts]
   (ring/ring-handler
     (ring/router
-      [["/" {}
-        ["" bh/index-handler]
-        ["new" bh/new-bookmark-handler]
-        ["bookmarks/{bid}" {:parameters {:path {:bid uuid?}}
+      [["/" bh/index-handler]
+       ["/new" bh/new-bookmark-handler]
+       ["/bookmarks/{bid}" {:parameters {:path {:bid uuid?}}
                             :middleware [inject-bookmark]}
-         ["" {:delete bh/delete-bookmark-handler}]
-         ["/edit" bh/edit-bookmark-handler]]]
+        ["" {:delete bh/delete-bookmark-handler}]
+        ["/edit" bh/edit-bookmark-handler]]
        ["/auth" {}
         ["/login" {:get  {:parameters {:query [:map [:to {:optional true} string?]]}
                           :handler    ah/login-handler-get}
@@ -68,15 +67,14 @@
       ;; router data affecting all routes
       {:data {:coercion   reitit.coercion.malli/coercion
               :muuntaja   mj/instance
-              :middleware [
-                           mw/wrap-authentication
+              :middleware [mw/wrap-authentication
                            mw/wrap-authorization
                            mw/wrap-access-rules
 
                            parameters/parameters-middleware
                            rrc/coerce-request-middleware
-                           muuntaja/format-response-middleware
                            rrc/coerce-response-middleware
+                           muuntaja/format-response-middleware
                            exception/exception-middleware
                            wrap-anti-forgery
 

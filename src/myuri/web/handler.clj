@@ -57,6 +57,7 @@
 
 (defn index-handler
   [{:keys [ds] :as req}]
+
   (let [query (-> req :params :q)
         bookmarks (db/bookmarks ds (user-id req) {:q query})
         bms (map model->bm bookmarks)]
