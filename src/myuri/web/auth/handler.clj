@@ -2,12 +2,11 @@
   (:require [buddy.hashers :as hashers]
             [malli.core :as malli]
             [malli.error :as me]
-            [myuri.db :as db]
             [myuri.model :as model]
+            [myuri.web.templating :refer [tpl-resp]]
             [myuri.web.utils :refer [is-post?]]
             [ring.util.codec :refer [url-decode url-encode]]
-            [ring.util.response :as resp]
-            [selmer.parser :refer [render-file]]))
+            [ring.util.response :as resp]))
 
 
 (defn check-user-password
@@ -16,12 +15,6 @@
   (when-let [user (model/get-account ds username)]
     (when (hashers/check password (get user :users/password_digest))
       (dissoc user :users/password_digest))))
-
-(defn tpl-resp
-  "docstring"
-  [template data]
-  {:selmer {:template template
-            :data     data}})
 
 
 (defn make-identity
@@ -40,8 +33,7 @@
           identity (make-identity user)]
       (-> (resp/redirect next)
           (assoc :session {:identity identity})))
-    (tpl-resp "auth/login.html" {:req      req
-                                 :username username
+    (tpl-resp "auth/login.html" {:username username
                                  :password password
                                  :error    true})))
 
@@ -49,7 +41,7 @@
   "docstring"
   [{:keys                 [ds] :as req
     {{:keys [to]} :query} :parameters}]
-  (tpl-resp "auth/login.html" {:req req}))
+  (tpl-resp "auth/login.html"))
 
 
 (defn logout-handler
@@ -79,15 +71,14 @@
   [{:keys [ds params] :as req}]
 
   (if-not (is-post? req)
-    (tpl-resp "auth/register.html" {:req req})
+    (tpl-resp "auth/register.html")
 
     (let [user (select-keys params [:username :email :password])]
       (if-let [errors (validate-model User-Registration user)]
         (tpl-resp "auth/register.html" {:req (assoc req :validation/errors errors)})
 
         (if (model/user-exists? ds user)
-          (tpl-resp "auth/register.html" {:req   req
-                                          :error "The provided username or email address already exist."})
+          (tpl-resp "auth/register.html" {:error "The provided username or email address already exist."})
           (do
             (model/create-user! ds nil user)
             (resp/redirect "/auth/login")))))))

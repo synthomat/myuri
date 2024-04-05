@@ -5,7 +5,7 @@
                 aria-expanded="false" aria-label="menu" class="navbar-burger" data-target="navMenu" role="button"><span
                 aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></a></div>
         <div class="navbar-menu" id="navMenu">
-            {% if req.identity %}
+            {% if req.session.identity %}
             <div class="navbar-start"><a class="navbar-item" href="/">Home</a>
                 <div class="navbar-item"><a class="button is-small is-light is-link" href="/new">New</a></div>
                 <div class="navbar-item column is-12">

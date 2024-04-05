@@ -7,9 +7,7 @@
             [myuri.web.auth.handler :refer [unauthorized-handler]]
             [ring.middleware.session :as rms]
             [ring.middleware.session.cookie :as cookie]
-            [ring.util.response :as resp]
-            [selmer.parser :refer [render-file]]
-            [myuri.web.utils :as u]))
+            [myuri.web.templating :as tmpl]))
 
 (def cookie-backend (bab/session {:unauthorized-handler unauthorized-handler}))
 
@@ -40,20 +38,6 @@
         (assoc :ds (:ds opts))
         (handler))))
 
-(defn wrap-template-response
-  "docstring"
-  [handler]
-  (fn [req]
-    (let [res (handler req)
-          {{:keys [template data]} :selmer :as selm} res
-          app-addr (u/app-address req)]
-      (if selm
-        (-> (render-file template (merge {:app-addr app-addr}
-                                         data))
-            resp/response
-            (resp/content-type "text/html"))
-        res))))
-
 (defn cookie-store
   [key]
   (let [byte-key (byte-array (map byte key))]
@@ -63,3 +47,8 @@
   "docstring"
   [handler key]
   (rms/wrap-session handler {:store (cookie-store key)}))
+
+(defn wrap-templating
+  "docstring"
+  [handler]
+  (tmpl/wrap-template-response handler))

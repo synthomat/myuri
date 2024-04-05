@@ -11,7 +11,12 @@
 
   (start [this]
     (log/info "Starting ServerComponent")
+
+    (selmer.parser/set-resource-path! (clojure.java.io/resource "templates"))
+    (selmer.parser/cache-off!)
+
     (let [{:keys [cookie-secret port dev?]} options
+
           create-handler #(routes/app {:ds            (:ds db)
                                        :cookie-secret cookie-secret})
           handler (if dev?

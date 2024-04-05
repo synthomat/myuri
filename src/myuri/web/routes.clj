@@ -7,15 +7,15 @@
     [myuri.web.middleware :as mw]
     [myuri.web.utils :as u]
 
-    [reitit.coercion.malli]
     [reitit.ring :as ring]
     [reitit.ring.coercion :as rrc]
-    [reitit.ring.middleware.exception :as exception]
     [reitit.ring.middleware.muuntaja :as muuntaja]
     [reitit.ring.middleware.parameters :as parameters]
     [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
     [ring.util.response :as resp]
-    [selmer.parser :refer [render-file]]))
+    [reitit.coercion.malli]
+    [selmer.parser :refer [render-file]]
+    [myuri.web.templating :refer [tpl-resp]]))
 
 ;; Utils ----------------------------------------------------------------------
 
@@ -23,8 +23,8 @@
   "docstring"
   [req]
   (-> (render-file "error-404.html" {:req req})
-      (ring.util.response/not-found)
-      (ring.util.response/content-type "text/html")))
+      (resp/response)
+      (resp/status 404)))
 
 
 (defn inject-bookmark
@@ -67,20 +67,21 @@
       ;; router data affecting all routes
       {:data {:coercion   reitit.coercion.malli/coercion
               :muuntaja   mj/instance
-              :middleware [mw/wrap-authentication
-                           mw/wrap-authorization
-                           mw/wrap-access-rules
-
-                           parameters/parameters-middleware
+              :middleware [parameters/parameters-middleware
                            rrc/coerce-request-middleware
                            rrc/coerce-response-middleware
                            muuntaja/format-response-middleware
-                           exception/exception-middleware
+                           ;exception/exception-middleware
                            wrap-anti-forgery
 
-                           mw/wrap-template-response]}})
+                           mw/wrap-templating]}})
 
     default-routes
 
     {:middleware [[mw/wrap-session (:cookie-secret opts)]
+
+                  mw/wrap-authentication
+                  mw/wrap-authorization
+                  mw/wrap-access-rules
+
                   [mw/wrap-system opts]]}))

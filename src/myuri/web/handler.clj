@@ -2,16 +2,14 @@
   (:require [cheshire.core :as json]
             [myuri.db :as db]
             [myuri.model :as m]
-            [myuri.web.utils :refer [is-post? user-id]]
+            [myuri.web.templating :refer [tpl-resp]]
 
-            [selmer.parser :refer [render-file]]
-            [ring.util.response :as resp])
+            [myuri.web.utils :refer [is-post? user-id]]
+            [ring.util.response :as resp]
+            [selmer.parser])
   (:import (java.text SimpleDateFormat)
            (java.time.format DateTimeFormatter)))
 
-(selmer.parser/set-resource-path! (clojure.java.io/resource "templates"))
-
-(selmer.parser/cache-off!)
 
 (defn format-date
   "docstring"
@@ -25,12 +23,6 @@
   ([date] (format-date date "yyyy-MM-dd"))
   ([date format] (.format (SimpleDateFormat. format) date)))
 
-(defn tpl-resp
-  "docstring"
-  [template data]
-  {:selmer {:template template
-            :data     data}})
-
 ;; Handlers -------------------------------------------------------------------
 (defn model->bm
   "docstring"
@@ -41,66 +33,39 @@
    :url        (:bookmarks/site_url m)
    :created_at (:bookmarks/created_at m)})
 
-(defn bm->model
-  "docstring"
-  [bm]
-  {:site_url   (:url bm)
-   :site_title (:title bm)})
-
-(defn html-response
-  "docstring"
-  [template data]
-  (-> (render-file template data)
-      resp/response
-      (resp/content-type "text/html")))
-
-
 (defn index-handler
   [{:keys [ds] :as req}]
 
   (let [query (-> req :params :q)
         bookmarks (db/bookmarks ds (user-id req) {:q query})
         bms (map model->bm bookmarks)]
-    (tpl-resp "index.html" {:bookmarks bms
-                            :req       (assoc req :authenticated true)})))
+    (tpl-resp "index.html" {:bookmarks bms})))
 
-(defn create-bookmark
-  "docstring"
-  [ds user-id bm]
-  (db/store! ds {:site_url   (:url bm)
-                 :site_title (:title bm)
-                 :user_id    user-id}))
+
 
 (defn new-bookmark-handler
   "docstring"
   [{:keys [ds params] :as req}]
-  (let [p (:p params)
-        su (get params "su")
+  (let [su (get params "su")
         st (get params "st")
         p (get params "p")]
 
     (if-not (is-post? req)
-      (html-response (if p
-                       "new-bookmark.html"
-                       "new-bookmark.html")
-                     {:req (assoc req :authenticated true)
-                      :su su
-                      :st st
-                      :p p})
+      (tpl-resp "new-bookmark.html"
+                {:su su, :st st, :p p})
       (let [user-id (user-id req)]
-        (when (create-bookmark ds user-id {:url   su
-                                           :title st})
+        (when (m/create-bookmark! ds user-id {:url   su
+                                              :title st})
           (future (println "Getting meta" su)))
         (if (= p "1")
-          (tpl-resp "close-window.html" nil)
+          (tpl-resp "close-window.html")
           (resp/redirect "/"))))))
 
 (defn edit-bookmark-handler
   "docstring"
   [{:keys [ds bookmark params] :as req}]
   (if-not (is-post? req)
-    (html-response "edit-bookmark.html" {:req (assoc req :authenticated true)
-                                         :bm  bookmark})
+    (tpl-resp "edit-bookmark.html" {:bm bookmark})
     (let [su (get params "su")
           st (get params "st")]
       (m/update-bookmark ds (:bookmarks/id bookmark) {:site_title st
@@ -110,7 +75,7 @@
 
 (defn delete-bookmark-handler
   "docstring"
-  [{:keys [ds bookmark params] :as req}]
+  [{:keys [ds bookmark] :as req}]
   (if (db/delete! ds (user-id req) (:bookmarks/id bookmark))
     (resp/status 200)
     (-> (resp/response "Something bad happened")
