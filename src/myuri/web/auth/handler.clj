@@ -72,12 +72,12 @@
 
 (defn register-handler
   "docstring"
-  [{:keys [ds params] :as req}]
+  [{:keys [ds parameters] :as req}]
 
   (if-not (is-post? req)
     (tpl-resp "auth/register.html")
 
-    (let [user (select-keys params [:username :email :password])]
+    (let [user (-> parameters :form)]
       (if-let [errors (validate-model User-Registration user)]
         (tpl-resp "auth/register.html" {:req (assoc req :validation/errors errors)})
 

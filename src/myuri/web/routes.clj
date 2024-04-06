@@ -62,7 +62,11 @@
                                               :to       string?}}
                           :handler    ah/login-handler-post}}]
         ["/logout" {:post ah/logout-handler}]
-        ["/register" ah/register-handler]]]
+        ["/register" {:get  {:handler ah/register-handler}
+                      :post {:parameters {:form {:username string?
+                                                 :email    string?
+                                                 :password string?}}
+                             :handler    ah/register-handler}}]]]
 
       ;; router data affecting all routes
       {:data {:coercion   reitit.coercion.malli/coercion

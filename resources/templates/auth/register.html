@@ -10,7 +10,6 @@
     {% endif %}
 
     <form action="/auth/register" method="post">
-        <input type="hidden" name="to" value="{{ to }}">
         <input type="hidden" name="__anti-forgery-token" value="{{ req.anti-forgery-token }}" />
         {% with err=req.validation/errors %}
         <div class="field">
