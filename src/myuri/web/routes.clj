@@ -23,8 +23,7 @@
   "docstring"
   [req]
   (-> (render-file "error-404.html" {:req req})
-      (resp/response)
-      (resp/status 404)))
+      (resp/not-found)))
 
 
 (defn inject-bookmark
@@ -37,7 +36,7 @@
 
       (if-let [bookmark (m/bookmark-by-id ds user-id bm-id)]
         (handler (assoc req :bookmark bookmark))
-        (resp/not-found nil)))))
+        (not-found-handler req)))))
 
 (def default-routes
   (ring/routes
@@ -48,7 +47,8 @@
   [opts]
   (ring/ring-handler
     (ring/router
-      [["/" bh/index-handler]
+      [["/" {:get {:parameters {:query [:map [:q {:optional true} string?]]}
+                   :handler    bh/index-handler}}]
        ["/new" bh/new-bookmark-handler]
        ["/bookmarks/{bid}" {:parameters {:path {:bid uuid?}}
                             :middleware [inject-bookmark]}

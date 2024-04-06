@@ -34,7 +34,6 @@
       (-> (resp/redirect next)
           (assoc :session {:identity identity})))
     (tpl-resp "auth/login.html" {:username username
-                                 :password password
                                  :error    true})))
 
 (defn login-handler-get
@@ -44,11 +43,16 @@
   (tpl-resp "auth/login.html"))
 
 
+(defn destroy-session
+  "docstring"
+  [resp]
+  (assoc resp :session nil))
+
 (defn logout-handler
   "docstring"
   [{session :session}]
   (-> (resp/redirect "/auth/login")                         ; Redirect to login
-      (assoc :session (dissoc session :identity))))
+      destroy-session))
 
 (def User-Registration
   (malli/schema

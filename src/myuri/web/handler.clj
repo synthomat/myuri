@@ -35,11 +35,11 @@
 
 (defn index-handler
   [{:keys [ds] :as req}]
-
-  (let [query (-> req :params :q)
+  (let [query (-> req :parameters :query :q)
         bookmarks (db/bookmarks ds (user-id req) {:q query})
         bms (map model->bm bookmarks)]
-    (tpl-resp "index.html" {:bookmarks bms})))
+    (tpl-resp "index.html" {:bookmarks bms
+                            :query query})))
 
 
 
