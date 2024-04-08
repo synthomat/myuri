@@ -8,16 +8,22 @@ It allows bookmarking websites using a convenient bookmarklet.
 
 ![Version 0.5](doc/screenshots/myuri_0.5.png)
 
-## Kick Start with Docker-Compose
+## Kick Start with Docker Compose
 
 The most convenient way of starting the software is by using docker-compose
 
 ```bash
 $ curl -OJ https://raw.githubusercontent.com/synthomat/myuri/main/docker-compose.yml
-$ docker-compose up
+$ docker compose up -d
 ```
 
 Then open browser at http://localhost:3000/
+
+## Roadmap
+
+- [ ] Auto generate cookie secret and store in database
+- [ ] Fetch site information in the background
+- [ ] Check link status regularly (e.g. for 404)
 
 ## Installation
 
@@ -50,16 +56,10 @@ $ DATABASE_URL=jdbc:postgresql://localhost/myuri java -jar target/myuri-0.9.jar
 | COOKIE_SECRET | JS9D2GG6ytgOLx06                       | PAWXt2maWB8bpBCR                       | 16-bytes encryption key for the Cookie Session store. **This is critical** – please change the default! |
 | PORT          | 3000                                   | 3000                                   | Web App HTTP Port                                                                                       |
 
-Launch with Docker-Compose
+Launch with Docker Compose
 
 ```bash
-$ docker-compose up
-```
-
-Or as daemonized containers (i.e. in background)
-
-```bash
-$ docker-compose up -d
+$ docker compose up -d  
 ```
 
 ## Build Docker image
@@ -92,6 +92,6 @@ $ clj -T:build test
 
 ## License
 
-Copyright © 2022–2023 Synthomat
+Copyright © 2022–2024 Synthomat
 
 Distributed under the ISC License
