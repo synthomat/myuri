@@ -11,10 +11,12 @@
 (defn is-post?
   "docstring"
   [req]
-  (= (-> req :request-method) :post))
+  (= (:request-method req) :post))
 
 (defn app-address
-  "docstring"
+  "Extracts the web-address of the application from the request map; Is used e.g. by the bookmarklet.
+   FIXME: Might need a fix for use behind a reverse proxy.
+   FIXME: Omit standard web ports (80, 443)"
   [req]
   (str (-> req :scheme name) "://" (:server-name req) ":" (:server-port req)))
 

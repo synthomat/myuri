@@ -1,0 +1,30 @@
+{% extends "_master.html" %}
+
+{% block page %}
+<div class="container">
+    <h3 class="title is3">Log in</h3>
+
+    {% if error %}
+    <div class="notification is-danger is-light"><strong>⚠️ Login failed:</strong> we couldn't find such a username/password combination.</div>
+    {% endif %}
+
+    <form action="/auth/login" method="post">
+        <input type="hidden" name="to" value="{{ req.params.to }}">
+        <input type="hidden" name="__anti-forgery-token" value="{{ req.anti-forgery-token }}" />
+
+        <div class="field">
+            <label for="" class="label">Username</label>
+            <div class="control"><input type="text" class="input" name="username" value="{{username}}"required></div>
+        </div>
+
+        <div class="field">
+            <label for="" class="label">Password</label>
+            <div class="control"><input type="password" class="input" name="password" required></div>
+        </div>
+
+        <div class="field">
+            <div class="control"><input type="submit" class="button is-link" value="login"> or <a href="/auth/register">register</a></div>
+        </div>
+    </form>
+</div>
+{% endblock %}

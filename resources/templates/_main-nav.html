@@ -1,0 +1,37 @@
+<div>
+    <nav aria-label="main navigation" class="navbar" role="navigation" style="border-bottom: #eaeaea 1px solid;">
+        <div class="navbar-brand"><a class="navbar-item" href="/"
+                                     style="font-size: 1.4em; font-weight: bold;">myuri<span style="color: red">*</span></a><a
+                aria-expanded="false" aria-label="menu" class="navbar-burger" data-target="navMenu" role="button"><span
+                aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></a></div>
+        <div class="navbar-menu" id="navMenu">
+            {% if req.session.identity %}
+            <div class="navbar-start"><a class="navbar-item" href="/">Home</a>
+                <div class="navbar-item"><a class="button is-small is-light is-link" href="/new">New</a></div>
+                <div class="navbar-item column is-12">
+                    <form action="/" method="get"><input class="input is-small" name="q" placeholder="Search…"
+                                                         type="text" value="{{query}}"></form>
+                </div>
+            </div>
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <div class="buttons"><a class="button is-small"
+                                            href="javascript:window.open(&apos;{{app-addr}}/new?p=1&amp;su=&apos;+encodeURIComponent(document.location.href)+&apos;&amp;st=&apos;+document.title, &apos;&apos;, &apos;width=500,height=250&apos;)">Bookmarklet</a>
+                    </div>
+                </div>
+                <div class="navbar-item has-dropdown is-hoverable"><a class="navbar-link">synth</a>
+                    <div class="navbar-dropdown is-right"><a class="navbar-item" href="/" hx-post="/auth/logout"
+                                                             hx-target="body">Log out</a></div>
+                </div>
+            </div>
+            {% else %}
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <div class="buttons"><a class="button is-link is-small" href="/auth/login">Login</a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+</div>

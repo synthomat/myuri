@@ -2,11 +2,12 @@ version: "3.9"
 
 services:
   app:
-    image: synthomat/myuri:0.8
+    build: .
+    image: synthomat/myuri:0.9
     ports:
-      - "3000:3000"
+      - "4000:3000"
     environment:
-      DATABASE_URL: jdbc:postgresql://db/myuri?user=myuri&password=CHANGE_ME
+      DATABASE_URL: jdbc:postgresql://db/myuri?user=myuri&password=CHANGE_ME_TOO
     links:
       - db
     depends_on:

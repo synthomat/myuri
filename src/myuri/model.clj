@@ -8,6 +8,11 @@
   (:import (java.time LocalDateTime)
            (org.postgresql.util PGobject)))
 
+
+(def bookmark
+  [:map
+   [:url :string?]])
+
 ;; Users ----------------------------------------------------------------------
 
 (defn insert-user!
@@ -28,6 +33,13 @@
     (sql/get-by-id ds :users username :email nil)
     (sql/get-by-id ds :users username :username nil)))
 
+(defn user-exists?
+  "docstring"
+  [ds user]
+  (-> (sql/query ds ["select * from users where lower(username) = lower(?) or lower(email) = lower(?) limit 1"
+                     (:username user) (:email user)])
+      first
+      some?))
 
 (defn send-verification-mail
   "docstring"
@@ -46,6 +58,13 @@
                                                    user))))
 
 ;; Manage Bookmarks -----------------------------------------------------------
+(defn create-bookmark!
+  "docstring"
+  [ds user-id bm]
+  (sql/insert! ds :bookmarks {:site_url   (:url bm)
+                              :site_title (:title bm)
+                              :user_id    user-id}))
+
 (defn bookmark-by-id
   "docstring"
   [ds user-id bookmark-id]

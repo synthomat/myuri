@@ -1,67 +1,102 @@
 (ns myuri.web.handler
-  (:require [bidi.ring :refer [make-handler]]
+  (:require [cheshire.core :as json]
+            [myuri.db :as db]
             [myuri.model :as m]
-            [myuri.web.auth.handler :as ah]
-            [myuri.web.settings.handler :as sh]
-            [myuri.web.bookmarks.handler :as bh]
-            [myuri.web.middleware :as mw]
-            [myuri.web.utils :as u]
-            [myuri.web.views :as v]
-            [ring.util.response :as resp]))
+            [myuri.web.templating :refer [tpl-resp]]
 
-;; Utils ----------------------------------------------------------------------
+            [myuri.web.utils :refer [is-post? user-id]]
+            [ring.util.response :as resp]
+            [selmer.parser])
+  (:import (java.text SimpleDateFormat)
+           (java.time.format DateTimeFormatter)))
 
-(defn not-found-handler
+
+(defn format-date
   "docstring"
-  [req]
-  (-> (v/layout req
-                [:div.container {:style "margin-top: 20px;"}
-                 [:h3.is-size-3 {:style "color: #666"} "Page not found"]
-                 [:div {:style "color: #888"} "You might have misspelled it or it might just be gone…"]])
-      (resp/status 404)))
+  [format date]
+  (-> format
+      DateTimeFormatter/ofPattern
+      (.format date)))
+
+(defn format-date
+  "docstring"
+  ([date] (format-date date "yyyy-MM-dd"))
+  ([date format] (.format (SimpleDateFormat. format) date)))
+
+;; Handlers -------------------------------------------------------------------
+(defn model->bm
+  "docstring"
+  [m]
+  {:id         (:bookmarks/id m)
+   :title      (or (not-empty (:bookmarks/site_title m))
+                   (:bookmarks/site_url m))
+   :url        (:bookmarks/site_url m)
+   :created_at (:bookmarks/created_at m)})
+
+(defn index-handler
+  [{:keys [ds] :as req}]
+  (let [query (-> req :parameters :query :q)
+        bookmarks (db/bookmarks ds (user-id req) {:q query})
+        bms (map model->bm bookmarks)]
+    (tpl-resp "index.html" {:bookmarks bms
+                            :query query})))
 
 
-(defn inject-bookmark
-  "Fetches a bookmark by the authenticated user and injects it into the request map"
-  [handler]
 
-  (fn [{:keys [ds params] :as req} ]
-    (let [user-id (u/user-id req)
-          bm-id (-> params :id parse-uuid)]
+(defn new-bookmark-handler
+  "docstring"
+  [{:keys [ds params] :as req}]
+  (let [su (get params "su")
+        st (get params "st")
+        p (get params "p")]
 
-      (if-let [bookmark (m/bookmark-by-id ds user-id bm-id)]
-        (handler (assoc req :bookmark bookmark))
-        (-> (resp/not-found {:message (format "Could not find bookmark: %s" (-> params :id))})
-            (resp/content-type "application/json"))))))
+    (if-not (is-post? req)
+      (tpl-resp "new-bookmark.html"
+                {:su su, :st st, :p p})
+      (let [user-id (user-id req)]
+        (when (m/create-bookmark! ds user-id {:url   su
+                                              :title st})
+          (future (println "Getting meta" su)))
+        (if (= p "1")
+          (tpl-resp "close-window.html")
+          (resp/redirect "/"))))))
 
-;; Routes and Middlewares -----------------------------------------------------
-(def web-routes
-  ["/" {""                 bh/index-handler
-        "new"              bh/new-bookmark-handler
-        ["bookmarks/" :id] {:delete {"" bh/delete-bookmark-handler}
-                            "/edit" bh/edit-bookmark-handler}
-        "backup"           {""    sh/backup-endpoint
-                            :post {"/export" sh/export-handler}}
-        "auth/"            {"login"    ah/login-handler
-                            :post      {"logout" ah/logout}
-                            "register" ah/register-handler}
-        "settings"         {""        (fn [req] (resp/redirect "/settings/ui"))
-                            "/tokens" sh/token-settings-handler
-                            "/ui"     sh/ui-settings-handler
-                            "/backup" sh/backup-endpoint}
-
-        ;; API ----------------------------------------------------------------
-        "api/"             {"bookmarks"       {""        {:get bh/api-index-handler
-                                                          :post bh/api-create-bookmark-handler}
-                                               ["/" :id] {:get   (-> bh/api-bookmark-handler inject-bookmark)
-                                                          :patch (-> bh/api-update-bookmark-handler inject-bookmark)}}
-                            "collections"     {"" bh/api-collections-handler}
-                            ["user/settings"] {:put {"" sh/config-toggle-handler}}}
-
-        true               not-found-handler}])
+(defn edit-bookmark-handler
+  "docstring"
+  [{:keys [ds bookmark params] :as req}]
+  (if-not (is-post? req)
+    (tpl-resp "edit-bookmark.html" {:bm bookmark})
+    (let [su (get params "su")
+          st (get params "st")]
+      (m/update-bookmark ds (:bookmarks/id bookmark) {:site_title st
+                                                      :site_url   su})
+      (resp/redirect "/"))))
 
 
-(defn new-handler
-  [opts]
-  (-> (make-handler web-routes)
-      (mw/wrap-middlewares opts)))
+(defn delete-bookmark-handler
+  "docstring"
+  [{:keys [ds bookmark] :as req}]
+  (if (db/delete! ds (user-id req) (:bookmarks/id bookmark))
+    (resp/status 200)
+    (-> (resp/response "Something bad happened")
+        (resp/status 500))))
+
+
+(defn send-json-file
+  "Makes the browser download the provided file"
+  [data file-name]
+  (-> (resp/response data)
+      (resp/header "Content-Disposition" (format "attachment; filename=\"%s\"" file-name))
+      (resp/content-type "application/json")))
+
+(defn export-handler
+  "docstring"
+  [{:keys [ds] :as req}]
+
+  (let [export-data (m/export-bookmarks ds (user-id req))
+        ts (:time export-data)
+        file-name (format "myuri-export_%s.json" (format-date "yyMMddHHmm" ts))
+        json-data (-> export-data
+                      (assoc :time (format-date "yyyy-MM-dd HH:mm:ss" ts))
+                      (json/encode {:pretty true}))]
+    (send-json-file json-data file-name)))

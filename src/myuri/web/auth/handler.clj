@@ -2,9 +2,8 @@
   (:require [buddy.hashers :as hashers]
             [malli.core :as malli]
             [malli.error :as me]
-            [myuri.db :as db]
             [myuri.model :as model]
-            [myuri.web.auth.views :as av]
+            [myuri.web.templating :refer [tpl-resp]]
             [myuri.web.utils :refer [is-post?]]
             [ring.util.codec :refer [url-decode url-encode]]
             [ring.util.response :as resp]))
@@ -18,45 +17,51 @@
       (dissoc user :users/password_digest))))
 
 
-(defn login-handler
+(defn make-identity
   "docstring"
-  [{:keys [ds] :as req}]
-  (if-not (is-post? req)
-    (av/login-view req)
-    (let [{:keys [username password]} (:params req)]
-      (if-let [user (check-user-password ds username password)]
-        (let [to (-> req :params :to)
-              next (if to
-                     (url-decode to)
-                     "/")]
-          (-> (resp/redirect next)
-              (assoc :session {:identity {:id       (:users/id user)
-                                          :username (:users/username user)
-                                          :email    (:users/email user)}})))
-        (av/login-view req true)))))
+  [user]
+  {:id       (:users/id user)
+   :username (:users/username user)
+   :email    (:users/email user)})
 
-(defn token-auth
+(defn login-handler-post
   "docstring"
-  [ds]
-  (fn [req token]
-    (when-let [user (db/user-by-token ds token)]
-      {:id       (:users/id user)
-       :username (:users/username user)
-       :email    (:users/email user)})))
+  [{:keys                                  [ds] :as req
+    {{:keys [username password to]} :form} :parameters}]
+  (if-let [user (check-user-password ds username password)]
+    (let [next (url-decode (or (not-empty to) "/"))
+          identity (make-identity user)]
+      (-> (resp/redirect next)
+          (assoc :session {:identity identity})))
+    (tpl-resp "auth/login.html" {:username username
+                                 :error    true})))
 
-(defn logout
+(defn login-handler-get
+  "docstring"
+  [{:keys                 [ds] :as req
+    {{:keys [to]} :query} :parameters}]
+  (tpl-resp "auth/login.html"))
+
+
+(defn destroy-session
+  "docstring"
+  [resp]
+  (assoc resp :session nil))
+
+(defn logout-handler
   "docstring"
   [{session :session}]
   (-> (resp/redirect "/auth/login")                         ; Redirect to login
-      (assoc :session (dissoc session :identity))))
+      destroy-session))
 
 (def User-Registration
-  (malli/schema [:map
-                 [:username [:fn {:error/message "Username must consist of lowercase a-z, 0-9, '-', '_' and should be 3-20 characters long"}
-                             (partial re-matches #"^[a-z0-9\-_]{3,20}$")]]
-                 [:email [:fn {:error/message "Please provide a valid email address"}
-                          (partial re-matches #"^.+@.{2,}\..{2,}$")]]
-                 [:password [:string {:min 10}]]]))
+  (malli/schema
+    [:map
+     [:username [:fn {:error/message "Username must consist of lowercase a-z, 0-9, '-', '_' and should be 3-20 characters long"}
+                 (partial re-matches #"^[a-z0-9\-_]{3,20}$")]]
+     [:email [:fn {:error/message "Please provide a valid email address"}
+              (partial re-matches #"^.+@.{2,}\..{2,}$")]]
+     [:password [:string {:min 10}]]]))
 
 (defn validate-model
   "docstring"
@@ -67,16 +72,20 @@
 
 (defn register-handler
   "docstring"
-  [{:keys [ds params] :as req}]
+  [{:keys [ds parameters] :as req}]
 
   (if-not (is-post? req)
-    (av/register-view req)
-    (let [user (select-keys params [:username :email :password])]
+    (tpl-resp "auth/register.html")
+
+    (let [user (-> parameters :form)]
       (if-let [errors (validate-model User-Registration user)]
-        (av/register-view (assoc req :validation/errors errors))
-        (do
-          (model/create-user! ds nil user)
-          (resp/redirect "/auth/login"))))))
+        (tpl-resp "auth/register.html" {:req (assoc req :validation/errors errors)})
+
+        (if (model/user-exists? ds user)
+          (tpl-resp "auth/register.html" {:error "The provided username or email address already exist."})
+          (do
+            (model/create-user! ds nil user)
+            (resp/redirect "/auth/login")))))))
 
 
 

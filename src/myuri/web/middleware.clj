@@ -1,24 +1,34 @@
 (ns myuri.web.middleware
   (:require [buddy.auth :refer [authenticated?]]
-            [buddy.auth.accessrules :refer [wrap-access-rules]]
-            [buddy.auth.backends :as backends]
-            [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
-            [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
-            [ring.middleware.json :refer [wrap-json-response wrap-json-params]]
-            [ring.middleware.reload :refer [wrap-reload]]
-            [ring.middleware.cors :refer [wrap-cors]]
-            [ring.middleware.session.cookie :refer [cookie-store]]
+            [buddy.auth.accessrules :as baa]
+            [buddy.auth.backends]
+            [buddy.auth.backends :as bab]
+            [buddy.auth.middleware :as bam]
+            [myuri.web.auth.handler :refer [unauthorized-handler]]
+            [ring.middleware.session :as rms]
+            [ring.middleware.session.cookie :as cookie]
+            [myuri.web.templating :as tmpl]))
 
-            [myuri.web.auth.handler :refer [unauthorized-handler token-auth]]))
+(def cookie-backend (bab/session {:unauthorized-handler unauthorized-handler}))
 
-(def cookie-backend (backends/session {:unauthorized-handler unauthorized-handler}))
-
-(defn token-backend
-  [ds]
-  (backends/token {:authfn (token-auth ds)}))
 
 (def authz-rules [{:pattern #"^/auth/.*" :handler (constantly true)} ; Let everyone use the auth endpoints
                   {:pattern #"^/.*" :handler authenticated?}])
+
+(defn wrap-authorization
+  "docstring"
+  [handler]
+  (bam/wrap-authorization handler cookie-backend))
+
+(defn wrap-authentication
+  "docstring"
+  [handler]
+  (bam/wrap-authentication handler cookie-backend))
+
+(defn wrap-access-rules
+  "docstring"
+  [handler]
+  (baa/wrap-access-rules handler {:rules authz-rules}))
 
 (defn wrap-system
   "Injects System components into the request map"
@@ -28,35 +38,17 @@
         (assoc :ds (:ds opts))
         (handler))))
 
-(defn wrap-auth
-  "docstring"
-  [handler rules & backends]
-  (-> handler
-      (wrap-access-rules {:rules rules})
-      ((fn [h] (apply wrap-authentication h backends)))
-      (wrap-authorization cookie-backend)))
+(defn cookie-store
+  [key]
+  (let [byte-key (byte-array (map byte key))]
+    (cookie/cookie-store {:key byte-key})))
 
-(defn wrap-site-defaults
+(defn wrap-session
   "docstring"
-  [handler opts]
-  (let [cookie-stor (cookie-store {:key (:cookie-secret opts)})
-        defaults (-> site-defaults
-                     (assoc-in [:session :store] cookie-stor)
-                     (assoc-in [:session :cookie-attrs :same-site] :lax)
-                     (assoc-in [:security :anti-forgery] false))]
-    (wrap-defaults handler defaults)))
+  [handler key]
+  (rms/wrap-session handler {:store (cookie-store key)}))
 
-(defn wrap-middlewares
+(defn wrap-templating
   "docstring"
-  [handler opts]
-  (-> handler
-      (wrap-auth authz-rules
-                 cookie-backend
-                 (token-backend (:ds opts)))
-      (wrap-system opts)
-      (wrap-site-defaults opts)
-      (wrap-cors :access-control-allow-origin #".*"
-                   :access-control-allow-methods [:get :put :post :delete])
-      (wrap-json-params {:keywords? true :bigdecimals? true})
-      (wrap-json-response)
-      (wrap-reload)))
+  [handler]
+  (tmpl/wrap-template-response handler))
