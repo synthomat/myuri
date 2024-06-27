@@ -19,7 +19,7 @@
                                             href="javascript:window.open(&apos;{{app-addr}}/new?p=1&amp;su=&apos;+encodeURIComponent(document.location.href)+&apos;&amp;st=&apos;+document.title, &apos;&apos;, &apos;width=500,height=250&apos;)">Bookmarklet</a>
                     </div>
                 </div>
-                <div class="navbar-item has-dropdown is-hoverable"><a class="navbar-link">synth</a>
+                <div class="navbar-item has-dropdown is-hoverable"><a class="navbar-link">{{ req.identity.username }}</a>
                     <div class="navbar-dropdown is-right"><a class="navbar-item" href="/" hx-post="/auth/logout"
                                                              hx-target="body">Log out</a></div>
                 </div>

@@ -1,8 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file. This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
+## [0.10] – UNRELEASED
 
-## [0.9] – UNRELEASED
+## [0.9] – 2024-04-16
+### Added
+* Restored search and registration
+* Implemented Anti-Forgery protection
 
 ## [0.8] – 2023-11-04
 ### Changed
