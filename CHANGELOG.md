@@ -1,7 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file. This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
-## [0.10] – UNRELEASED
+## [0.10] – 2024-08-24
+### Fixed
+* Displayed username was wrong.
+
+### Added
+* Added descriptions to bookmarks
 
 ## [0.9] – 2024-04-16
 ### Added
