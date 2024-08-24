@@ -1,35 +1,23 @@
 (ns myuri.web.handler
   (:require [cheshire.core :as json]
             [myuri.web.templating :refer [tpl-resp]]
-
             [myuri.web.utils :refer [is-post? user-id]]
             [ring.util.response :as resp]
+            [clj-http.util :as hu]
             [selmer.parser]
-            [myuri.api :as api])
-  (:import (java.text SimpleDateFormat)
-           (java.time.format DateTimeFormatter)))
+            [myuri.api :as api]
+            [myuri.web.render :as render]))
 
-
-(defn format-date
-  "docstring"
-  [format date]
-  (-> format
-      DateTimeFormatter/ofPattern
-      (.format date)))
-
-(defn format-date
-  "docstring"
-  ([date] (format-date date "yyyy-MM-dd"))
-  ([date format] (.format (SimpleDateFormat. format) date)))
 
 (defn- model->bm
   "docstring"
   [m]
-  {:id         (:bookmarks/id m)
-   :title      (or (not-empty (:bookmarks/site_title m))
-                   (:bookmarks/site_url m))
-   :url        (:bookmarks/site_url m)
-   :created_at (:bookmarks/created_at m)})
+  {:id          (:bookmarks/id m)
+   :title       (or (not-empty (:bookmarks/site_title m))
+                    (:bookmarks/site_url m))
+   :url         (:bookmarks/site_url m)
+   :description (:bookmarks/site_description m)
+   :created_at  (:bookmarks/created_at m)})
 
 (defn- method-not-allowed
   "docstring"
@@ -38,25 +26,28 @@
       (resp/status 405)))
 
 ;; Handlers --------------------------------------------------------------------
-
-
 (defn index-handler
   [{:keys                [ds] :as req
     {{search :q} :query} :parameters}]
   (let [bookmarks-list (api/list-bookmarks ds (user-id req) {:q search})
         bookmarks (map model->bm bookmarks-list)]
-    (tpl-resp "index.html" {:bookmarks bookmarks
-                            :query     search})))
+    (render/index {:bookmarks bookmarks
+                   :query     search})))
+
+
 
 (defn new-bookmark-handler
   "docstring"
-  [{:keys [ds params request-method] :as req}]
-  (let [{:strs [su st p]} params]
+  [{:keys                            [ds request-method] :as req
+    {{:keys [data p]}         :query
+     {:keys [close] :as form} :form} :parameters}]
+  (prn data)
+  (let [data (json/parse-string data true)]
     (case request-method
-      :get (tpl-resp "new-bookmark.html" {:su su, :st st, :p p})
-      :post (when (api/create-bookmark ds (user-id req) {:url   su
-                                                         :title st})
-              (if (= p "1")
+      :get (tpl-resp "bookmarks/new-bm.html" (merge data
+                                                    {:p p}))
+      :post (when (api/create-bookmark ds (user-id req) (select-keys form [:url :title :description]))
+              (if (= close 1)
                 (tpl-resp "close-window.html")
                 (resp/redirect "/"))))))
 
@@ -65,10 +56,11 @@
   [{:keys               [ds bookmark params request-method] :as req
     {bid :bookmarks/id} :bookmark}]
   (case request-method
-    :get (tpl-resp "edit-bookmark.html" {:bm bookmark})
-    :post (let [{:strs [su st]} params]
-            (api/update-bookmark ds (user-id req) bid {:site_title st
-                                                       :site_url   su})
+    :get (tpl-resp "bookmarks/edit-bm.html" {:bm bookmark})
+    :post (let [{:strs [url title description]} params]
+            (api/update-bookmark ds (user-id req) bid {:site_title       title
+                                                       :site_url         url
+                                                       :site_description description})
             (resp/redirect "/"))
     (method-not-allowed)))
 

@@ -64,9 +64,10 @@
 (defn create-bookmark!
   "docstring"
   [ds user-id bm]
-  (sql/insert! ds :bookmarks {:site_url   (:url bm)
-                              :site_title (:title bm)
-                              :user_id    user-id}))
+  (sql/insert! ds :bookmarks {:site_url         (:url bm)
+                              :site_title       (:title bm)
+                              :site_description (:description bm)
+                              :user_id          user-id}))
 
 (defn bookmark-by-id
   "docstring"

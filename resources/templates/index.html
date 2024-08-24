@@ -7,12 +7,13 @@
     <div class="bm-item">
         <a href="{{ bm.url }}">
             <div>{{ bm.title }}</div>
-            <div style="margin: -4px 0 2px 0; font-size: 12px; color: #889">
-                {{ bm.url }}
-            </div>
+
         </a>
-        <div class="bm-footer"><span class="date">{{ bm.created_at }}</span> – <a href="/bookmarks/{{ bm.id }}/edit"
-                                                                                  class="edit-bm">edit</a> | <a
+        <p style="color: grey;">{{ bm.description }}</p>
+        <div class="bm-footer">
+            <div style="margin: -4px 0 2px 0; font-size: 12px; color: #889">{{ bm.url }}</div>
+            <span class="date" title="{{bm.created_at|date:fullDate}}">{{ bm.created_at|date:shortDate }}</span> – <a
+                href="/bookmarks/{{ bm.id }}/edit" class="edit-bm">edit</a> | <a
                 href="/bookmarks/{{ bm.id }}" hx-target="closest div.bm-item" hx-swap="delete"
                 hx-delete="/bookmarks/{{ bm.id }}">delete</a></div>
     </div>

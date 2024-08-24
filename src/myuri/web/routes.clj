@@ -13,14 +13,15 @@
     [reitit.coercion.malli]
     [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
     [ring.util.response :as resp]
-    [selmer.parser :refer [render-file]]))
+    [selmer.parser :refer [render-file]]
+    [myuri.web.specs :as specs]))
 
 ;; Utils ----------------------------------------------------------------------
 
 (defn not-found-handler
   "docstring"
   [req]
-  (-> (render-file "error-404.html" {:req req})
+  (-> (render-file "errors/error-404.html" {:req req})
       (resp/not-found)))
 
 (defn inject-bookmark
@@ -42,10 +43,19 @@
   [opts]
   (ring/ring-handler
     (ring/router
-      [["/" {:get {:parameters {:query [:map
-                                        [:q {:optional true} string?]]}
+      [["/" {:get {:parameters {:query specs/GetBookmarksRequest}
                    :handler    bh/index-handler}}]
-       ["/new" bh/new-bookmark-handler]
+       ["/new" {:get  {:parameters {:query [:map
+                                            [:data {:optional true} :string]
+                                            [:p {:optional true} int?]]}
+                       :handler    bh/new-bookmark-handler}
+                :post {:parameters {:form [:map
+                                           [:close {:optional true, :default 0} int?]
+                                           [:url :string]
+                                           [:title {:optional true} :string]
+                                           [:description {:optional true} :string]]}
+                       :handler    bh/new-bookmark-handler}}
+        ]
        ["/bookmarks/{bid}" {:parameters {:path {:bid uuid?}}
                             :middleware [inject-bookmark]}
         ["" {:delete bh/delete-bookmark-handler}]
