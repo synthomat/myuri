@@ -13,7 +13,7 @@
   [:map
    [:url :string?]])
 
-;; Users ----------------------------------------------------------------------
+;; Users -----------------------------------------------------------------------
 
 (defn insert-user!
   "Creates new user record"
@@ -36,7 +36,10 @@
 (defn user-exists?
   "docstring"
   [ds user]
-  (-> (sql/query ds ["select * from users where lower(username) = lower(?) or lower(email) = lower(?) limit 1"
+  (-> (sql/query ds ["select * from users
+                      where lower(username) = lower(?)
+                            or lower(email) = lower(?)
+                      limit 1"
                      (:username user) (:email user)])
       first
       some?))
@@ -61,9 +64,10 @@
 (defn create-bookmark!
   "docstring"
   [ds user-id bm]
-  (sql/insert! ds :bookmarks {:site_url   (:url bm)
-                              :site_title (:title bm)
-                              :user_id    user-id}))
+  (sql/insert! ds :bookmarks {:site_url         (:url bm)
+                              :site_title       (:title bm)
+                              :site_description (:description bm)
+                              :user_id          user-id}))
 
 (defn bookmark-by-id
   "docstring"

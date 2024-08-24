@@ -3,7 +3,7 @@ version: "3.9"
 services:
   app:
     build: .
-    image: synthomat/myuri:0.9
+    image: synthomat/myuri:0.10
     ports:
       - "4000:3000"
     environment:
