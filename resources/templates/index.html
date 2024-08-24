@@ -15,7 +15,8 @@
             <span class="date" title="{{bm.created_at|date:fullDate}}">{{ bm.created_at|date:shortDate }}</span> – <a
                 href="/bookmarks/{{ bm.id }}/edit" class="edit-bm">edit</a> | <a
                 href="/bookmarks/{{ bm.id }}" hx-target="closest div.bm-item" hx-swap="delete"
-                hx-delete="/bookmarks/{{ bm.id }}">delete</a></div>
+                hx-delete="/bookmarks/{{ bm.id }}">delete</a>
+        </div>
     </div>
     {% endfor %}
 </div>

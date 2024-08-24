@@ -3,10 +3,10 @@
 {% block page %}
 
 <div class="container" style="margin-top: 30px;">
-    <!--<h3 class="is-size-3">Add Bookmark</h3>-->
+    {% if not p %}<h3 class="is-size-3">Add Bookmark</h3>{% endif %}
     <div style="padding: 10px">
         <form action="/new" method="post">
-            <input type="hidden" name="close" value="{{ p }}" />
+            {% if p %}<input type="hidden" name="close" value="{{ p }}" />{% endif %}
             <input type="hidden" name="__anti-forgery-token" value="{{ req.anti-forgery-token }}" />
             <div class="field">
                 <label for="" class="label">URL</label>
@@ -21,6 +21,7 @@
                 </div>
             </div>
             <div class="field">
+                <label for="" class="label">Description</label>
                 <div class="control">
                     <textarea class="textarea" name="description">{{ description }}</textarea>
                 </div>

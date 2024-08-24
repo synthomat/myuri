@@ -12,7 +12,9 @@
 
 </head>
 <body>
+{% if not p %}
 {% include "_main-nav.html" %}
+{% endif %}
 
 {% block page %}
 {% endblock %}

@@ -34,14 +34,11 @@
     (render/index {:bookmarks bookmarks
                    :query     search})))
 
-
-
 (defn new-bookmark-handler
   "docstring"
   [{:keys                            [ds request-method] :as req
     {{:keys [data p]}         :query
      {:keys [close] :as form} :form} :parameters}]
-  (prn data)
   (let [data (json/parse-string data true)]
     (case request-method
       :get (tpl-resp "bookmarks/new-bm.html" (merge data
