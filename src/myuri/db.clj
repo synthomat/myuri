@@ -2,6 +2,7 @@
   (:require [next.jdbc :as jdbc]
             [next.jdbc.sql :as sql]
             [honey.sql :as hsql]
+            [honey.sql.helpers :as hh]
             [com.stuartsierra.component :as component]
             [migratus.core :as migratus]
             [clojure.tools.logging :as log]
@@ -90,6 +91,37 @@
                           left join users u on u.id = at.user_id
                           where at.token = ?" token]))
 
+
+(defn user
+  "docstring"
+  [ds user-id]
+  (sql/get-by-id ds :users user-id))
+
+(defn user-settings
+  "docstring"
+  ([ds user-id]
+   (user-settings ds user-id nil))
+  ([ds user-id setting-names]
+   (let [stmt (-> (apply hh/select (or setting-names
+                                       :*))
+                  (hh/from :user_settings)
+                  (hh/where [:= :user_id user-id])
+                  hsql/format)]
+     (-> (sql/query ds stmt)
+         first))))
+
+(defn set-user-settings!
+  "docstring"
+  [ds user-id settings]
+  (let [statement (-> (hh/update :user_settings)
+                      (hh/set settings)
+                      (hh/where [:= :user_id user-id])
+                      hsql/format)]
+    (jdbc/execute! ds statement)))
+
+(defn update-user! [ds user-id user-data]
+  (sql/update! ds :users user-data ["id = ?" user-id]))
+
 ;; Database Management --------------------------------------------------------
 
 (defn migratus-config
@@ -118,3 +150,4 @@
 
 (defn new-database [opts]
   (map->DatabaseComponent {:options opts}))
+

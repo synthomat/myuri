@@ -10,6 +10,7 @@
     [reitit.ring.coercion :as rrc]
     [reitit.ring.middleware.muuntaja :as muuntaja]
     [reitit.ring.middleware.parameters :as parameters]
+    [ring.middleware.keyword-params :as kpmw]
     [reitit.coercion.malli]
     [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
     [ring.util.response :as resp]
@@ -54,8 +55,7 @@
                                            [:url :string]
                                            [:title {:optional true} :string]
                                            [:description {:optional true} :string]]}
-                       :handler    bh/new-bookmark-handler}}
-        ]
+                       :handler    bh/new-bookmark-handler}}]
        ["/bookmarks/{bid}" {:parameters {:path {:bid uuid?}}
                             :middleware [inject-bookmark]}
         ["" {:delete bh/delete-bookmark-handler}]
@@ -73,12 +73,23 @@
                       :post {:parameters {:form {:username string?
                                                  :email    string?
                                                  :password string?}}
-                             :handler    ah/register-handler}}]]]
+                             :handler    ah/register-handler}}]]
+       ["/settings" {}
+        ["" {:get  {:name    "settings:general"
+                    :handler bh/settings-index}
+             :post {:name    "settings:general:post"
+                    :parameters {:form [:map
+                                        [:target_blank {:optional true} boolean?]]}
+                    :handler bh/settings-index}}]
+        ["/security" {:name    "settings:security"
+                      :handler bh/security-handler}]]
+       ]
 
       ;; router data affecting all routes
       {:data {:coercion   reitit.coercion.malli/coercion
               :muuntaja   mj/instance
               :middleware [parameters/parameters-middleware
+                           kpmw/wrap-keyword-params
                            rrc/coerce-request-middleware
                            rrc/coerce-response-middleware
                            muuntaja/format-response-middleware

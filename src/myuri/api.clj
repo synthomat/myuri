@@ -1,5 +1,6 @@
 (ns myuri.api
-  (:require [myuri.db :as db]
+  (:require [buddy.hashers :as hashers]
+            [myuri.db :as db]
             [myuri.model :as m]))
 
 ;; Bookmarks -------------------------------------------------------------------
@@ -26,3 +27,14 @@
 
 (defn delete-bookmark [ds user-id bookmark-id]
   (db/delete! ds user-id bookmark-id))
+
+;; Settings / Security --------------------------------------------------------
+(defn change-user-password
+  "docstring"
+  [ds user-id old-password new-password]
+  (let [user (db/user ds user-id)]
+    (if (hashers/check old-password (:users/password_digest user))
+      (let [password-hash (hashers/derive new-password)]
+        (db/update-user! ds user-id {:password_digest password-hash}))
+      {:error :wrong_password
+       :message "old password doesn't match current user password don't match"})))

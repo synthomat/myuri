@@ -25,7 +25,8 @@
       (if-let [selm (tpl-resp? res)]
         (let [{:keys [template data]} selm
               tpl-data (merge {:app-addr (u/app-address req)
-                               :req      req}
+                               :req      req
+                               :route-name (-> req :reitit.core/match :data :name)}
                               data)]
           (assoc res :body (render-file template tpl-data)))
         res))))

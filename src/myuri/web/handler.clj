@@ -1,12 +1,15 @@
 (ns myuri.web.handler
   (:require [cheshire.core :as json]
+            [myuri.db :as db]
             [myuri.web.templating :refer [tpl-resp]]
+            [myuri.web.utils :as u]
             [myuri.web.utils :refer [is-post? user-id]]
             [ring.util.response :as resp]
             [clj-http.util :as hu]
             [selmer.parser]
             [myuri.api :as api]
-            [myuri.web.render :as render]))
+            [myuri.web.render :as render]
+            [clojure.pprint :as pp]))
 
 
 (defn- model->bm
@@ -17,7 +20,8 @@
                     (:bookmarks/site_url m))
    :url         (:bookmarks/site_url m)
    :description (:bookmarks/site_description m)
-   :created_at  (:bookmarks/created_at m)})
+   :created_at  (:bookmarks/created_at m)
+   :checks      (:bookmarks/checks m)})
 
 (defn- method-not-allowed
   "docstring"
@@ -29,10 +33,13 @@
 (defn index-handler
   [{:keys                [ds] :as req
     {{search :q} :query} :parameters}]
-  (let [bookmarks-list (api/list-bookmarks ds (user-id req) {:q search})
-        bookmarks (map model->bm bookmarks-list)]
+  (let [user-id (user-id req)
+        bookmarks-list (api/list-bookmarks ds user-id {:q search})
+        bookmarks (map model->bm bookmarks-list)
+        user-settings (db/user-settings ds user-id [:target_blank])]
     (render/index {:bookmarks bookmarks
-                   :query     search})))
+                   :query     search
+                   :us        user-settings})))
 
 (defn new-bookmark-handler
   "docstring"
@@ -89,3 +96,36 @@
                         (assoc :time (format-date "yyyy-MM-dd HH:mm:ss" ts))
                         (json/encode {:pretty true}))]
       (send-json-file json-data file-name)))
+
+
+;;
+
+(defn settings-index
+  "docstring"
+  [{:keys          [ds request-method] :as req
+    {:keys [form]} :parameters}]
+
+  (let [user-id (u/user-id req)
+        allowed-settings {:target_blank false}
+        settings (db/user-settings ds user-id (keys allowed-settings))]
+    (if (not= request-method :post)
+      (tpl-resp "settings/index.html" {:us settings})
+      (let [safe-settings (reduce-kv (fn [m k v]
+                                       (assoc m k (get form k v)))
+                                     {}
+                                     allowed-settings)]
+        (db/set-user-settings! ds user-id safe-settings)
+        (resp/redirect "/settings")))))
+
+(defn security-handler
+  "docstring"
+  [{:keys [ds request-method] :as req}]
+  (let [user-id (u/user-id req)]
+    (if (not= request-method :post)
+      (tpl-resp "settings/security.html")
+      (case (-> req :params :action)
+        "password_change" (if-let [resp (api/change-user-password ds user-id (-> req :params :current_password) (-> req :params :new_password))]
+                            (tpl-resp "settings/security.html" {:message "Password changed successfully!"})
+                            (tpl-resp "settings/security.html"))
+        :default (tpl-resp "settings/security.html"))))
+  )
