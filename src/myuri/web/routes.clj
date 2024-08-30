@@ -75,12 +75,11 @@
                                                  :password string?}}
                              :handler    ah/register-handler}}]]
        ["/settings" {}
-        ["" {:get  {:name    "settings:general"
-                    :handler bh/settings-index}
-             :post {:name    "settings:general:post"
-                    :parameters {:form [:map
+        ["" {:name "settings:general"
+             :get  {:handler bh/settings-index}
+             :post {:parameters {:form [:map
                                         [:target_blank {:optional true} boolean?]]}
-                    :handler bh/settings-index}}]
+                    :handler    bh/settings-index}}]
         ["/security" {:name    "settings:security"
                       :handler bh/security-handler}]]
        ]

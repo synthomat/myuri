@@ -3,7 +3,6 @@
             [ring.util.response :as resp]
             [selmer.parser :refer [render-file]]))
 
-
 (defn tpl-resp
   "docstring"
   ([template] (tpl-resp template nil))

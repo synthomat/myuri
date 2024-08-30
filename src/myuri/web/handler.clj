@@ -61,7 +61,7 @@
     {bid :bookmarks/id} :bookmark}]
   (case request-method
     :get (tpl-resp "bookmarks/edit-bm.html" {:bm bookmark})
-    :post (let [{:strs [url title description]} params]
+    :post (let [{:keys [url title description]} params]
             (api/update-bookmark ds (user-id req) bid {:site_title       title
                                                        :site_url         url
                                                        :site_description description})
@@ -127,5 +127,4 @@
         "password_change" (if-let [resp (api/change-user-password ds user-id (-> req :params :current_password) (-> req :params :new_password))]
                             (tpl-resp "settings/security.html" {:message "Password changed successfully!"})
                             (tpl-resp "settings/security.html"))
-        :default (tpl-resp "settings/security.html"))))
-  )
+        :default (tpl-resp "settings/security.html")))))
