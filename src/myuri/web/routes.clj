@@ -80,8 +80,12 @@
              :post {:parameters {:form [:map
                                         [:target_blank {:optional true} boolean?]]}
                     :handler    bh/settings-index}}]
-        ["/security" {:name    "settings:security"
-                      :handler bh/security-handler}]]
+        ["/security" {:name "settings:security"
+                      :get  {:handler bh/security-handler}
+                      :post {:handler    bh/security-handler
+                             :parameters {:form {:current_password string?
+                                                 :new_password     string?
+                                                 :new_password2    string?}}}}]]
        ]
 
       ;; router data affecting all routes
