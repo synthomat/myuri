@@ -67,9 +67,11 @@
         query (when (not-empty q)
                 [:or
                  [:ilike :site_title (str "%" q "%")]
-                 [:ilike :site_url (str "%" q "%")]])
+                 [:ilike :site_url (str "%" q "%")]
+                 [:ilike :site_description (str "%" q "%")]])
         pred (conj base-pred query)]
-    (sql/query ds (hsql/format {:select   [:*] :from :bookmarks
+    (sql/query ds (hsql/format {:select   [:*]
+                                :from     :bookmarks
                                 :where    pred
                                 :order-by [[:created_at :desc]]}))))
 

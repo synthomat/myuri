@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file. This change
 ### Added
 * User settings! Starting with control whether links should open in a new window or not.
 
+### Changed
+* Search includes the bookmark description now
+
 ## [0.10] – 2024-08-24
 ### Fixed
 * Displayed username was wrong.
