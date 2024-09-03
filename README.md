@@ -65,7 +65,7 @@ $ docker compose up -d
 ## Build Docker image
 
 ```bash
-$ docker build -t myuri:0.10 .
+$ docker build -t myuri:0.11 .
 ```
 
 ## Dev environment

@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file. This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
-## [0.11] – UNRELEASED
+## [0.11] – 2024-09-03
 ### Added
 * User settings! Starting with control whether links should open in a new window or not.
 * Admin page with users overview
