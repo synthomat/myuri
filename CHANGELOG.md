@@ -4,9 +4,11 @@ All notable changes to this project will be documented in this file. This change
 ## [0.11] – UNRELEASED
 ### Added
 * User settings! Starting with control whether links should open in a new window or not.
+* Admin page with users overview
 
 ### Changed
 * Search includes the bookmark description now
+* Introduced the is-admin flag for users; first user to register becomes admin
 
 ## [0.10] – 2024-08-24
 ### Fixed

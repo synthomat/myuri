@@ -75,6 +75,10 @@
                                                  :email    string?
                                                  :password string?}}
                              :handler    ah/register-handler}}]]
+       ["/admin" {}
+        ["" {:name    "admin:users"
+             :handler bh/admin-users}]
+        ]
        ["/settings" {}
         ["" {:name "settings:general"
              :get  {:handler bh/settings-index}
@@ -101,7 +105,8 @@
                            wrap-flash
                            wrap-anti-forgery
 
-                           mw/wrap-templating]}})
+                           mw/wrap-templating
+                           mw/wrap-access-rules]}})
 
     default-routes
 
@@ -109,6 +114,6 @@
 
                   mw/wrap-authentication
                   mw/wrap-authorization
-                  mw/wrap-access-rules
+
 
                   [mw/wrap-system opts]]}))

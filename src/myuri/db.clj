@@ -104,11 +104,14 @@
   ([ds]
    (users ds nil))
   ([ds limit]
-
-   (sql/query ds (hsql/format (merge {:select :*
-                                      :from   :users}
-                                     (when limit
-                                       {:limit limit}))))))
+   (let [query (-> (merge {:select    [:users.* [:%count.bookmarks :bookmarks-count]]
+                           :from      :users
+                           :left-join [:bookmarks [:= :users.id :bookmarks.user_id]]
+                           :group-by  :users.id}
+                          (when limit
+                            {:limit limit}))
+                   hsql/format)]
+     (sql/query ds query))))
 
 (defn user-settings
   "docstring"

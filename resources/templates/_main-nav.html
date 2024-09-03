@@ -23,6 +23,11 @@
                 <div class="navbar-item has-dropdown is-hoverable"><a class="navbar-link">{{ req.identity.username}}</a>
                     <div class="navbar-dropdown is-right">
                         <a class="navbar-item" href="/settings">Settings</a>
+
+                        {% if identity.is-admin %}
+                        <hr class="navbar-divider">
+                        <a class="navbar-item" href="/admin">Administration</a>
+                        {% endif %}
                         <hr class="navbar-divider">
                         <a class="navbar-item" href="/" hx-post="/auth/logout" hx-target="body">Log out</a></div>
 

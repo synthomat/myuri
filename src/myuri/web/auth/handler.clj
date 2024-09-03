@@ -24,7 +24,11 @@
   [user]
   {:id       (:users/id user)
    :username (:users/username user)
-   :email    (:users/email user)})
+   :email    (:users/email user)
+   :is-admin (:users/is_admin user)
+   :roles    (merge #{:user}
+                    (when (:users/is_admin user)
+                      :admin))})
 
 (defn login-handler-post
   "docstring"

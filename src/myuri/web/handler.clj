@@ -130,3 +130,10 @@
                                   (tpl-resp "settings/security.html" {:message "Password changed successfully!"})
                                   (tpl-resp "settings/security.html"))
               :default (tpl-resp "settings/security.html")))))
+
+
+(defn admin-users
+  "docstring"
+  [{:keys [ds] :as req}]
+  (let [users (api/list-users ds)]
+    (tpl-resp "admin/users.html" {:users users})))
