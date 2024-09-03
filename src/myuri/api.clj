@@ -28,6 +28,12 @@
 (defn delete-bookmark [ds user-id bookmark-id]
   (db/delete! ds user-id bookmark-id))
 
+;; Users ----------------------------------------------------------------------
+(defn list-users
+  "docstring"
+  [ds]
+  (db/users ds))
+
 ;; Settings / Security --------------------------------------------------------
 (defn change-user-password
   "docstring"

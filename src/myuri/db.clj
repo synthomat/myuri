@@ -99,6 +99,17 @@
   [ds user-id]
   (sql/get-by-id ds :users user-id))
 
+(defn users
+  "docstring"
+  ([ds]
+   (users ds nil))
+  ([ds limit]
+
+   (sql/query ds (hsql/format (merge {:select :*
+                                      :from   :users}
+                                     (when limit
+                                       {:limit limit}))))))
+
 (defn user-settings
   "docstring"
   ([ds user-id]
