@@ -11,9 +11,25 @@
 
 (def cookie-backend (bab/session {:unauthorized-handler unauthorized-handler}))
 
+(defn any-role?
+  "docstring"
+  [req]
+  (let [path-roles (-> req :reitit.core/match :data :roles)
+        user-roles (-> req :identity :roles)]
+    (prn path-roles)
+    (some? (not-empty (clojure.set/intersection path-roles user-roles)))))
 
-(def authz-rules [{:pattern #"^/auth/.*" :handler (constantly true)} ; Let everyone use the auth endpoints
-                  {:pattern #"^/.*" :handler authenticated?}])
+(defn is-admin?
+  "docstring"
+  [req]
+  (contains? (-> req :identity :roles) :admin))
+
+(def authz-rules [{:pattern #"^/auth/.*" :handler any?}     ; Let everyone use the auth endpoints
+                  {:pattern #"^/admin"
+                   :handler is-admin?
+                   :on-error (fn [req error]
+                               (tmpl/tpl-resp "errors/403-forbidden.html"))}
+                  {:pattern  #"^/.*" :handler authenticated?}])
 
 (defn wrap-authorization
   "docstring"

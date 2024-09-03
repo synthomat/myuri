@@ -1,17 +1,17 @@
 {% extends "_master.html" %}
 
 {% block page %}
-
 <div class="container" style="margin-top: 30px;">
     {% for bm in bookmarks %}
     <div class="bm-item">
-        <a href="{{ bm.url }}">
+        <a href="{{ bm.url }}" title="{{ bm.url }}" {% if us.user_settings/target_blank %}target="_blank"{% endif %}>
             <div>{{ bm.title }}</div>
-
         </a>
+        {% if bm.checks %}<span class="tag is-danger is-light">{{ bm.checks.status_code }}</span>{% endif %}
+
         <p style="color: grey;">{{ bm.description }}</p>
         <div class="bm-footer">
-            <div style="margin: -4px 0 2px 0; font-size: 12px; color: #889">{{ bm.url }}</div>
+            <div style="margin: -4px 0 2px 0; font-size: 12px; color: #889" title="{{ bm.url }}">{{ bm.url_host }}</div>
             <span class="date" title="{{bm.created_at|date:fullDate}}">{{ bm.created_at|date:shortDate }}</span> – <a
                 href="/bookmarks/{{ bm.id }}/edit" class="edit-bm">edit</a> | <a
                 href="/bookmarks/{{ bm.id }}" hx-target="closest div.bm-item" hx-swap="delete"

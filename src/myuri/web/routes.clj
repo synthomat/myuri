@@ -10,9 +10,11 @@
     [reitit.ring.coercion :as rrc]
     [reitit.ring.middleware.muuntaja :as muuntaja]
     [reitit.ring.middleware.parameters :as parameters]
+    [ring.middleware.keyword-params :as kpmw]
     [reitit.coercion.malli]
     [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
     [ring.util.response :as resp]
+    [ring.middleware.flash :refer [wrap-flash]]
     [selmer.parser :refer [render-file]]
     [myuri.web.specs :as specs]))
 
@@ -54,8 +56,7 @@
                                            [:url :string]
                                            [:title {:optional true} :string]
                                            [:description {:optional true} :string]]}
-                       :handler    bh/new-bookmark-handler}}
-        ]
+                       :handler    bh/new-bookmark-handler}}]
        ["/bookmarks/{bid}" {:parameters {:path {:bid uuid?}}
                             :middleware [inject-bookmark]}
         ["" {:delete bh/delete-bookmark-handler}]
@@ -73,19 +74,39 @@
                       :post {:parameters {:form {:username string?
                                                  :email    string?
                                                  :password string?}}
-                             :handler    ah/register-handler}}]]]
+                             :handler    ah/register-handler}}]]
+       ["/admin" {}
+        ["" {:name    "admin:users"
+             :handler bh/admin-users}]
+        ]
+       ["/settings" {}
+        ["" {:name "settings:general"
+             :get  {:handler bh/settings-index}
+             :post {:parameters {:form [:map
+                                        [:target_blank {:optional true} boolean?]]}
+                    :handler    bh/settings-index}}]
+        ["/security" {:name "settings:security"
+                      :get  {:handler bh/security-handler}
+                      :post {:handler    bh/security-handler
+                             :parameters {:form {:current_password string?
+                                                 :new_password     string?
+                                                 :new_password2    string?}}}}]]
+       ]
 
       ;; router data affecting all routes
       {:data {:coercion   reitit.coercion.malli/coercion
               :muuntaja   mj/instance
               :middleware [parameters/parameters-middleware
+                           kpmw/wrap-keyword-params
                            rrc/coerce-request-middleware
                            rrc/coerce-response-middleware
                            muuntaja/format-response-middleware
                            ;exception/exception-middleware
-                           [wrap-anti-forgery]
+                           wrap-flash
+                           wrap-anti-forgery
 
-                           mw/wrap-templating]}})
+                           mw/wrap-templating
+                           mw/wrap-access-rules]}})
 
     default-routes
 
@@ -93,6 +114,6 @@
 
                   mw/wrap-authentication
                   mw/wrap-authorization
-                  mw/wrap-access-rules
+
 
                   [mw/wrap-system opts]]}))

@@ -47,7 +47,7 @@ This will produce a self contained uberjar in the `target/` directory.
 Run that uberjar:
 
 ```bash
-$ DATABASE_URL=jdbc:postgresql://localhost/myuri java -jar target/myuri-0.10.jar
+$ DATABASE_URL=jdbc:postgresql://localhost/myuri java -jar target/myuri-0.11.jar
 ```
 
 | Environment   | Default                                | Example                                | Explanation                                                                                             |
@@ -65,7 +65,7 @@ $ docker compose up -d
 ## Build Docker image
 
 ```bash
-$ docker build -t myuri:0.10 .
+$ docker build -t myuri:0.11 .
 ```
 
 ## Dev environment

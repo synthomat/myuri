@@ -2,6 +2,8 @@
   (:require [buddy.hashers :as hashers]
             [malli.core :as malli]
             [malli.error :as me]
+            [myuri.api :as api]
+            [myuri.db :as db]
             [myuri.model :as model]
             [myuri.web.templating :refer [tpl-resp]]
             [myuri.web.utils :refer [is-post?]]
@@ -22,7 +24,11 @@
   [user]
   {:id       (:users/id user)
    :username (:users/username user)
-   :email    (:users/email user)})
+   :email    (:users/email user)
+   :is-admin (:users/is_admin user)
+   :roles    (merge #{:user}
+                    (when (:users/is_admin user)
+                      :admin))})
 
 (defn login-handler-post
   "docstring"
@@ -84,7 +90,9 @@
         (if (model/user-exists? ds user)
           (tpl-resp "auth/register.html" {:error "The provided username or email address already exist."})
           (do
-            (model/create-user! ds nil user)
+            (model/create-user! ds nil (merge user
+                                              (when (empty? (db/users ds 1))
+                                                {:is_admin true})))
             (resp/redirect "/auth/login")))))))
 
 

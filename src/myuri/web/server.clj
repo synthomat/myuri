@@ -19,6 +19,7 @@
 
           create-handler #(routes/app {:ds            (:ds db)
                                        :cookie-secret cookie-secret})
+
           handler (if dev?
                     (do
                       (log/info "Starting server in debug mode (auto-reload enabled)")

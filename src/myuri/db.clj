@@ -2,6 +2,7 @@
   (:require [next.jdbc :as jdbc]
             [next.jdbc.sql :as sql]
             [honey.sql :as hsql]
+            [honey.sql.helpers :as hh]
             [com.stuartsierra.component :as component]
             [migratus.core :as migratus]
             [clojure.tools.logging :as log]
@@ -66,9 +67,11 @@
         query (when (not-empty q)
                 [:or
                  [:ilike :site_title (str "%" q "%")]
-                 [:ilike :site_url (str "%" q "%")]])
+                 [:ilike :site_url (str "%" q "%")]
+                 [:ilike :site_description (str "%" q "%")]])
         pred (conj base-pred query)]
-    (sql/query ds (hsql/format {:select   [:*] :from :bookmarks
+    (sql/query ds (hsql/format {:select   [:*]
+                                :from     :bookmarks
                                 :where    pred
                                 :order-by [[:created_at :desc]]}))))
 
@@ -89,6 +92,51 @@
   (jdbc/execute-one! ds ["select u.* from api_tokens at
                           left join users u on u.id = at.user_id
                           where at.token = ?" token]))
+
+
+(defn user
+  "docstring"
+  [ds user-id]
+  (sql/get-by-id ds :users user-id))
+
+(defn users
+  "docstring"
+  ([ds]
+   (users ds nil))
+  ([ds limit]
+   (let [query (-> (merge {:select    [:users.* [:%count.bookmarks :bookmarks-count]]
+                           :from      :users
+                           :left-join [:bookmarks [:= :users.id :bookmarks.user_id]]
+                           :group-by  :users.id}
+                          (when limit
+                            {:limit limit}))
+                   hsql/format)]
+     (sql/query ds query))))
+
+(defn user-settings
+  "docstring"
+  ([ds user-id]
+   (user-settings ds user-id nil))
+  ([ds user-id setting-names]
+   (let [stmt (-> (apply hh/select
+                         (or setting-names :*))
+                  (hh/from :user_settings)
+                  (hh/where [:= :user_id user-id])
+                  hsql/format)]
+     (-> (sql/query ds stmt)
+         first))))
+
+(defn set-user-settings!
+  "docstring"
+  [ds user-id settings]
+  (let [statement (-> (hh/update :user_settings)
+                      (hh/set settings)
+                      (hh/where [:= :user_id user-id])
+                      hsql/format)]
+    (jdbc/execute! ds statement)))
+
+(defn update-user! [ds user-id user-data]
+  (sql/update! ds :users user-data ["id = ?" user-id]))
 
 ;; Database Management --------------------------------------------------------
 
@@ -118,3 +166,4 @@
 
 (defn new-database [opts]
   (map->DatabaseComponent {:options opts}))
+

@@ -1,0 +1,27 @@
+{% extends "admin/_layout.html" %}
+
+{% block content %}
+
+<table class="table table is-fullwidth">
+    <thead>
+    <tr>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Bookmarks#</th>
+        <th>Admin</th>
+        <th>Registered at</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for user in users %}
+    <tr>
+        <td>{{ user.users/username }}</td>
+        <td>{{ user.users/email }}</td>
+        <td>{{ user.bookmarks_count }}</td>
+        <td>{%if user.users/is_admin %}<span class="tag is-danger is-light">admin</span>{% endif %}</td>
+        <td>{{ user.users/created_at|date:shortDateTime }}</td></tr>
+    </tbody>
+    {% endfor %}
+
+</table>
+{% endblock %}

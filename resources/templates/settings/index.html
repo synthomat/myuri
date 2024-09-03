@@ -1,0 +1,20 @@
+{% extends "settings/_layout.html" %}
+
+{% block content %}
+
+<form method="post">
+    <input type="hidden" name="__anti-forgery-token" value="{{ req.anti-forgery-token }}"/>
+    <div class="field">
+    <label class="checkbox">
+        <input type="checkbox" name="target_blank" value="true" {% if us.user_settings/target_blank %}checked{% endif %}/>
+        Open bookmarks in a new window
+    </label>
+    </div>
+    <div class="field">
+        <div class="control">
+            <input type="submit" class="button is-link" value="save" autofocus/>
+        </div>
+    </div>
+</form>
+
+{% endblock %}
