@@ -14,6 +14,7 @@
     [reitit.coercion.malli]
     [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
     [ring.util.response :as resp]
+    [ring.middleware.flash :refer [wrap-flash]]
     [selmer.parser :refer [render-file]]
     [myuri.web.specs :as specs]))
 
@@ -97,7 +98,8 @@
                            rrc/coerce-response-middleware
                            muuntaja/format-response-middleware
                            ;exception/exception-middleware
-                           [wrap-anti-forgery]
+                           wrap-flash
+                           wrap-anti-forgery
 
                            mw/wrap-templating]}})
 

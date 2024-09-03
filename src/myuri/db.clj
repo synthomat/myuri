@@ -104,8 +104,8 @@
   ([ds user-id]
    (user-settings ds user-id nil))
   ([ds user-id setting-names]
-   (let [stmt (-> (apply hh/select (or setting-names
-                                       :*))
+   (let [stmt (-> (apply hh/select
+                         (or setting-names :*))
                   (hh/from :user_settings)
                   (hh/where [:= :user_id user-id])
                   hsql/format)]
