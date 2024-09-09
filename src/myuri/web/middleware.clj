@@ -13,23 +13,40 @@
 
 (defn any-role?
   "docstring"
-  [req]
+  [{:keys [identity] :as req}]
   (let [path-roles (-> req :reitit.core/match :data :roles)
-        user-roles (-> req :identity :roles)]
+        user-roles (:roles identity)]
     (prn path-roles)
     (some? (not-empty (clojure.set/intersection path-roles user-roles)))))
 
-(defn is-admin?
+(defn any-access
+  "Allows any user"
+  [_]
+  true)
+
+(defn authenticated-access
   "docstring"
   [req]
-  (contains? (-> req :identity :roles) :admin))
+  (if (authenticated? req)
+    (baa/success)
+    (baa/error {:code 401
+                :message "You are not authenticated. Please log in."})))
 
-(def authz-rules [{:pattern #"^/auth/.*" :handler any?}     ; Let everyone use the auth endpoints
-                  {:pattern #"^/admin"
-                   :handler is-admin?
-                   :on-error (fn [req error]
-                               (tmpl/tpl-resp "errors/403-forbidden.html"))}
-                  {:pattern  #"^/.*" :handler authenticated?}])
+(defn admin-access
+  "docstring"
+  [{:keys [identity] :as req}]
+
+  (if (contains? (:roles identity) :admin)
+    (baa/success)
+    (baa/error {:code    403
+                :message "Unauthorized admin access"})))
+
+(def rules [{:pattern #"^/auth"
+             :handler any-access}
+            {:pattern #"^/admin"
+             :handler admin-access}
+            {:pattern #"^/.*"
+             :handler authenticated-access}])
 
 (defn wrap-authorization
   "docstring"
@@ -44,7 +61,7 @@
 (defn wrap-access-rules
   "docstring"
   [handler]
-  (baa/wrap-access-rules handler {:rules authz-rules}))
+  (baa/wrap-access-rules handler {:rules rules}))
 
 (defn wrap-system
   "Injects System components into the request map"

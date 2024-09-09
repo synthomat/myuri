@@ -19,7 +19,7 @@
    :title       (or (not-empty (:bookmarks/site_title m))
                     (:bookmarks/site_url m))
    :url         (:bookmarks/site_url m)
-   :url_host        (u/domain-from-url (:bookmarks/site_url m))
+   :url_host    (u/domain-from-url (:bookmarks/site_url m))
    :description (:bookmarks/site_description m)
    :created_at  (:bookmarks/created_at m)
    :checks      (:bookmarks/checks m)})
@@ -123,12 +123,17 @@
   [{:keys          [ds request-method] :as req
     {:keys [form]} :parameters}]
   (let [user-id (u/user-id req)]
+    (prn "hella")
     (case request-method
       :get (tpl-resp "settings/security.html")
       :post (case (-> req :params :action)
-              "password_change" (if-let [resp (api/change-user-password ds user-id (-> req :params :current_password) (-> req :params :new_password))]
-                                  (tpl-resp "settings/security.html" {:message "Password changed successfully!"})
-                                  (tpl-resp "settings/security.html"))
+              "password_change" (if-some [resp (api/change-user-password ds user-id (-> req :params :current_password) (-> req :params :new_password))]
+                                  (do
+                                    (prn resp)
+                                    (assoc (resp/redirect "/settings/security")
+                                      :flash {:class "is-success"
+                                              :message "Password changed successfully"}))
+                                  (tpl-resp "settings/security.html" {:errors "Wrong password"}))
               :default (tpl-resp "settings/security.html")))))
 
 

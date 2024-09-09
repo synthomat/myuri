@@ -1,7 +1,9 @@
 {% extends "settings/_layout.html" %}
 
 {% block content %}
-
+{% if req.flash %}
+<div class="notification {{ req.flash.class }} is-light">{{ req.flash.message }}</div>
+{% endif %}
 <form method="post">
     <h3 class="is-size-3">Change Password</h3>
     <input type="hidden" name="__anti-forgery-token" value="{{ req.anti-forgery-token }}"/>

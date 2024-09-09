@@ -8,8 +8,8 @@
             [myuri.web.templating :refer [tpl-resp]]
             [myuri.web.utils :refer [is-post?]]
             [ring.util.codec :refer [url-decode url-encode]]
-            [ring.util.response :as resp]))
-
+            [ring.util.response :as resp]
+            [ring.middleware.flash :as flash]))
 
 (defn check-user-password
   "docstring"
@@ -17,7 +17,6 @@
   (when-let [user (model/get-account ds username)]
     (when (hashers/check password (get user :users/password_digest))
       (dissoc user :users/password_digest))))
-
 
 (defn make-identity
   "docstring"

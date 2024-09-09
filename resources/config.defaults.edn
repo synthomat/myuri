@@ -1,3 +1,3 @@
 {:database {:url #or [#env DATABASE_URL "jdbc:postgresql://localhost:5432/myuri"]}
  :server   {:port          #or [#env PORT 3000]
-            :cookie-secret #or [#env COOKIE_SECRET "agtjrfokft5rs95g"]}}
+            :cookie-secret #or [#env COOKIE_SECRET "agtjrfokft5rs9ksadjfla5g__"]}}
