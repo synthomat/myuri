@@ -28,7 +28,7 @@
            clojure.java-time/clojure.java-time {:mvn/version "1.4.2"}
 
            clj-http/clj-http                   {:mvn/version "3.13.0"} ; HTTP Client
-           ;org.clj-commons/hickory          {:mvn/version "0.7.3"} ; HTML parser
+           org.clj-commons/hickory             {:mvn/version "0.7.4"} ; HTML parser
            }
 
 

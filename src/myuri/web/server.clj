@@ -16,7 +16,6 @@
     (selmer.parser/cache-off!)
 
     (let [{:keys [cookie-secret port dev?]} options
-
           create-handler (fn []
                            (routes/app {:ds            (:ds db)
                                         :cookie-secret cookie-secret}))

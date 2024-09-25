@@ -1,15 +1,13 @@
 (ns myuri.web.middleware
   (:require [buddy.auth :refer [authenticated?]]
             [buddy.auth.accessrules :as baa]
-            [buddy.auth.backends]
-            [buddy.auth.backends :as bab]
+            [buddy.auth.backends :as auth-backends]
             [buddy.auth.middleware :as bam]
             [myuri.web.auth.handler :refer [unauthorized-handler]]
             [ring.middleware.session :as rms]
             [ring.middleware.session.cookie :as cookie]
             [myuri.web.templating :as tmpl]))
 
-(def cookie-backend (bab/session {:unauthorized-handler unauthorized-handler}))
 
 (defn any-role?
   "docstring"
@@ -29,7 +27,7 @@
   [req]
   (if (authenticated? req)
     (baa/success)
-    (baa/error {:code 401
+    (baa/error {:code    401
                 :message "You are not authenticated. Please log in."})))
 
 (defn admin-access
@@ -38,25 +36,36 @@
 
   (if (contains? (:roles identity) :admin)
     (baa/success)
-    (baa/error {:code    403
-                :message "Unauthorized admin access"})))
+    ;(tmpl/tpl-resp "errors/403-forbidden.html")
+    (baa/error (fn [req] (tmpl/tpl-resp "errors/403-forbidden.html")))
+    #_{:code    403
+       :message "Unauthorized admin access"}))
 
-(def rules [{:pattern #"^/auth"
+(def rules [{:uri     "/auth"
              :handler any-access}
-            {:pattern #"^/admin"
+            {:uri     "/admin"
              :handler admin-access}
-            {:pattern #"^/.*"
+            {:uri     "/"
              :handler authenticated-access}])
 
-(defn wrap-authorization
+(defn wrap-session
   "docstring"
-  [handler]
-  (bam/wrap-authorization handler cookie-backend))
+  [handler key]
+  (let [store (cookie/cookie-store {:key (.getBytes key)})]
+    (rms/wrap-session handler {:store store})))
+
+(def auth-backend (auth-backends/session
+                    {:unauthorized-handler unauthorized-handler}))
 
 (defn wrap-authentication
   "docstring"
   [handler]
-  (bam/wrap-authentication handler cookie-backend))
+  (bam/wrap-authentication handler auth-backend))
+
+(defn wrap-authorization
+  "docstring"
+  [handler]
+  (bam/wrap-authorization handler auth-backend))
 
 (defn wrap-access-rules
   "docstring"
@@ -71,15 +80,6 @@
         (assoc :ds (:ds opts))
         (handler))))
 
-(defn cookie-store
-  [key]
-  (let [byte-key (byte-array (map byte key))]
-    (cookie/cookie-store {:key byte-key})))
-
-(defn wrap-session
-  "docstring"
-  [handler key]
-  (rms/wrap-session handler {:store (cookie-store key)}))
 
 (defn wrap-templating
   "docstring"

@@ -12,12 +12,13 @@
     [reitit.ring.middleware.muuntaja :as muuntaja]
     [reitit.ring.middleware.parameters :as parameters]
     [ring.middleware.keyword-params :as kpmw]
-    [reitit.coercion.malli]
     [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
     [ring.util.response :as resp]
     [ring.middleware.flash :refer [wrap-flash]]
     [selmer.parser :refer [render-file]]
-    [myuri.web.specs :as specs]))
+    [myuri.web.specs :as specs]
+    [reitit.ring.middleware.dev :as dev]
+    [reitit.coercion.malli :as rc]))
 
 ;; Utils ----------------------------------------------------------------------
 
@@ -39,7 +40,6 @@
 
 
 (defn make-routes []
-
   [["/"
     {:get {:parameters {:query specs/GetBookmarksRequest}
            :handler    bh/index-handler}}]
@@ -88,19 +88,71 @@
       :post {:parameters {:form [:map
                                  [:target_blank {:optional true} boolean?]]}
              :handler    bh/settings-index}}]
-    ["/security"
-     {:name "settings:security"
-      :get  {:handler bh/security-handler}
-      :post {:handler    bh/security-handler
-             :parameters {:form {:current_password string?
-                                 :new_password     string?
-                                 :new_password2    string?}}}}]]]
-  )
+    ["/security" {:name "settings:security"
+                  :get  {:handler bh/security-handler}
+                  :post {:handler    bh/security-handler
+                         :parameters {:form {:current_password string?
+                                             :new_password     string?
+                                             :new_password2    string?}}}}]]])
 
 (def exception-middleware
   (exception/create-exception-middleware
     (merge exception/default-handlers
            {})))
+
+(defn default-routes
+  "docstring"
+  []
+  (ring/routes
+    (ring/create-resource-handler {:path "/assets"})
+    (ring/create-default-handler {:not-found not-found-handler})))
+
+(defn dummy
+  "docstring"
+  [handler ident]
+  (fn [req]
+    (prn (str "before " ident " <- " req))
+    (let [res (handler req)]
+      (prn (str "after " ident " -> " res))
+      res)))
+(comment
+  (def app
+    (wrap-cors
+      (wrap-json-parsing
+        (wrap-authentication
+          (wrap-logging
+            (wrap-error-handling
+              (reitit.ring/ring-handler router)))))))
+  )
+
+
+(defn ring-middlewares
+  "docstring"
+  [opts]
+  [[mw/wrap-system opts]
+
+   [mw/wrap-session (:cookie-secret opts)]
+
+   mw/wrap-authentication
+
+   mw/wrap-authorization
+   mw/wrap-access-rules
+   wrap-flash])
+
+(defn reitit-middlewares
+  "docstring"
+  []
+  [parameters/parameters-middleware
+   kpmw/wrap-keyword-params
+   muuntaja/format-middleware
+   wrap-anti-forgery
+
+   mw/wrap-templating
+
+   exception-middleware
+
+   rrc/coerce-request-middleware])
+
 
 (defn app
   [opts]
@@ -109,26 +161,11 @@
       (make-routes)
 
       ;; router data affecting all routes
-      {:data {:coercion   reitit.coercion.malli/coercion
+      {;:reitit.middleware/transform dev/print-request-diffs
+       :data {:coercion   rc/coercion
               :muuntaja   mj/instance
-              :middleware [parameters/parameters-middleware
-                           kpmw/wrap-keyword-params
-                           exception-middleware
-                           rrc/coerce-request-middleware
-                           rrc/coerce-response-middleware
-                           muuntaja/format-response-middleware
-                           wrap-anti-forgery
-                           mw/wrap-templating
-                           mw/wrap-access-rules
-                           ]}})
+              :middleware (reitit-middlewares)}})
 
-    (ring/routes
-      (ring/create-resource-handler {:path "/assets"})
-      (ring/create-default-handler {:not-found not-found-handler}))
+    (default-routes)
 
-    {:middleware [[mw/wrap-session (:cookie-secret opts)]
-                  wrap-flash
-
-                  mw/wrap-authentication
-                  mw/wrap-authorization
-                  [mw/wrap-system opts]]}))
+    {:middleware (ring-middlewares opts)}))

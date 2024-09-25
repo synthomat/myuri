@@ -115,6 +115,7 @@
                                        (assoc m k (get form k v)))
                                      {}
                                      allowed-settings)]
+        (prn safe-settings)
         (db/set-user-settings! ds user-id safe-settings)
         (resp/redirect "/settings")))))
 
@@ -131,7 +132,7 @@
                                   (do
                                     (prn resp)
                                     (assoc (resp/redirect "/settings/security")
-                                      :flash {:class "is-success"
+                                      :flash {:class   "is-success"
                                               :message "Password changed successfully"}))
                                   (tpl-resp "settings/security.html" {:errors "Wrong password"}))
               :default (tpl-resp "settings/security.html")))))

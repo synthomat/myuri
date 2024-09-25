@@ -63,17 +63,19 @@
 (defn bookmarks
   "docstring"
   [ds user-id & {:keys [q]}]
-  (let [base-pred [:and [:= :user_id user-id]]
-        query (when (not-empty q)
-                [:or
-                 [:ilike :site_title (str "%" q "%")]
-                 [:ilike :site_url (str "%" q "%")]
-                 [:ilike :site_description (str "%" q "%")]])
-        pred (conj base-pred query)]
-    (sql/query ds (hsql/format {:select   [:*]
-                                :from     :bookmarks
-                                :where    pred
-                                :order-by [[:created_at :desc]]}))))
+  (let [search-query (when (not-empty q)
+                       [:or
+                        [:ilike :site_title (str "%" q "%")]
+                        [:ilike :site_url (str "%" q "%")]
+                        [:ilike :site_description (str "%" q "%")]])
+        stmt (hsql/format
+               {:select   :*
+                :from     :bookmarks
+                :where    [:and
+                           [:= :user_id user-id]
+                           search-query]
+                :order-by [[:created_at :desc]]})]
+    (sql/query ds stmt)))
 
 (defn store!
   "docstring"
@@ -118,25 +120,42 @@
   ([ds user-id]
    (user-settings ds user-id nil))
   ([ds user-id setting-names]
-   (let [stmt (-> (apply hh/select
-                         (or setting-names :*))
-                  (hh/from :user_settings)
-                  (hh/where [:= :user_id user-id])
-                  hsql/format)]
+   (let [stmt (hsql/format
+                {:select (or setting-names :*)
+                 :from   :user_settings
+                 :where  [:= :user_id user-id]})]
      (-> (sql/query ds stmt)
          first))))
 
 (defn set-user-settings!
   "docstring"
   [ds user-id settings]
-  (let [statement (-> (hh/update :user_settings)
-                      (hh/set settings)
-                      (hh/where [:= :user_id user-id])
-                      hsql/format)]
+  (let [statement (hsql/format
+                    {:update :user_settings
+                     :set    settings
+                     :where  [:= :user_id user-id]})]
     (jdbc/execute! ds statement)))
 
 (defn update-user! [ds user-id user-data]
   (sql/update! ds :users user-data ["id = ?" user-id]))
+
+(defn read-system-prop
+  "docstring"
+  [ds key]
+  (-> (sql/get-by-id ds :system_configs key :key nil)
+      :system_configs/value))
+
+(defn write-system-prop
+  "docstring"
+  [ds key value]
+  (->> {:insert-into   :system_configs
+        :values        [{:key key, :value [:lift (->pgobject value)]}]
+        :on-conflict   :key
+        :do-update-set :value
+        :returning     [:*]}
+       hsql/format
+       (jdbc/execute! ds)))
+
 
 ;; Database Management --------------------------------------------------------
 
