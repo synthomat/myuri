@@ -25,7 +25,7 @@
 (defn not-found-handler
   "docstring"
   [req]
-  (-> (render-file "errors/error-404.html" {:req req})
+  (-> (render-file "errors/404-not-found.html" {:req req})
       (resp/not-found)))
 
 (defn inject-bookmark

@@ -5,7 +5,7 @@
     {% for bm in bookmarks %}
     <div class="bm-item">
         <a href="{{ bm.url }}" title="{{ bm.url }}" {% if us.user_settings/target_blank %}target="_blank"{% endif %}>
-            <div>{{ bm.title }}</div>
+        <div>{{ bm.title }}</div>
         </a>
         {% if bm.checks %}<span class="tag is-danger is-light">{{ bm.checks.status_code }}</span>{% endif %}
 
@@ -19,6 +19,27 @@
         </div>
     </div>
     {% endfor %}
+    <!--
+    <div class="block" style="margin-top: 3em">
+        <nav class="pagination" role="navigation" aria-label="pagination">
+            <a href="?" class="pagination-previous">Previous</a>
+            <a href="#" class="pagination-next">Next page</a>
+            <ul class="pagination-list">
+                <li><a href="#" class="pagination-link" aria-label="Goto page 1">1</a></li>
+                <li><span class="pagination-ellipsis">&hellip;</span></li>
+                <li><a href="#" class="pagination-link" aria-label="Goto page 45">45</a></li>
+                <li><a class="pagination-link is-current"
+                       aria-label="Page 46"
+                       aria-current="page">46</a>
+                </li>
+                <li><a href="#" class="pagination-link" aria-label="Goto page 47">47</a></li>
+                <li><span class="pagination-ellipsis">&hellip;</span></li>
+                <li><a href="#" class="pagination-link" aria-label="Goto page 86">86</a></li>
+            </ul>
+        </nav>
+    </div>
+    -->
 </div>
+
 
 {% endblock %}

@@ -124,7 +124,6 @@
   [{:keys          [ds request-method] :as req
     {:keys [form]} :parameters}]
   (let [user-id (u/user-id req)]
-    (prn "hella")
     (case request-method
       :get (tpl-resp "settings/security.html")
       :post (case (-> req :params :action)

@@ -3,17 +3,37 @@
 {% block content %}
 <form method="post">
     <input type="hidden" name="__anti-forgery-token" value="{{ req.anti-forgery-token }}"/>
+
     <div class="field">
-    <label class="checkbox">
-        <input type="checkbox" name="target_blank" value="true" {% if us.user_settings/target_blank %}checked{% endif %}/>
-        Open bookmarks in a new window
-    </label>
+        <label for="" class="label">Bookmarklet</label>
+        <div class="controll">
+            <a class="button"
+                                 href="javascript:var data={url:document.location.href,title:document.title,description:document.querySelector('head>meta[name=description]')?.content,bmv:1};
+                                            window.open('{{app-addr}}/new?p=1&data='+encodeURIComponent(JSON.stringify(data)), '', 'width=600,height=360')">Add Bookmark</a>
+        </div>
+        <p class="help">Drag this bookmarklet to your bookmark bar</p>
     </div>
+
     <div class="field">
+        <label class="label">Open bookmarks in</label>
+        <div class="control">
+            <div class="select">
+                <select name="target_blank">
+                    <option value="true" {% if us.user_settings/target_blank %}selected{% endif %}>New window</option>
+                    <option value="false" {% if not us.user_settings/target_blank %}selected{% endif %}>Same window</option>
+                </select>
+            </div>
+        </div>
+        <p class="help">Controls whether to open bookmarks in the same or a new window</p>
+    </div>
+
+
+    <div class="control">
         <div class="control">
             <input type="submit" class="button is-link" value="save" autofocus/>
         </div>
     </div>
+
 </form>
 
 {% endblock %}
