@@ -10,8 +10,9 @@
             <div class="navbar-start"><a class="navbar-item" href="/">Home</a>
                 <div class="navbar-item"><a class="button is-small is-light is-link" href="/new">New</a></div>
                 <div class="navbar-item column is-12">
-                    <form action="/" method="get"><input class="input is-small" name="q" placeholder="Search…"
-                                                         type="text" value="{{query}}"></form>
+                    <form action="/" method="get">
+                        <input class="input is-small" name="q" placeholder="Search…" type="text" value="{{query}}" />
+                    </form>
                 </div>
             </div>
             <div class="navbar-end">
@@ -26,7 +27,8 @@
                         <a class="navbar-item" href="/admin">Administration</a>
                         <hr class="navbar-divider">
                         {% endif %}
-                        <a class="navbar-item" href="/" hx-post="/auth/logout" hx-target="body">Log out</a></div>
+                        <a class="navbar-item" href="/" hx-post="/auth/logout" hx-target="body">Log out</a>
+                    </div>
                 </div>
             </div>
             {% else %}

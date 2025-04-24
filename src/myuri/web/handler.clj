@@ -5,7 +5,6 @@
             [myuri.web.utils :as u]
             [myuri.web.utils :refer [is-post? user-id]]
             [ring.util.response :as resp]
-            [clj-http.util :as hu]
             [selmer.parser]
             [myuri.api :as api]
             [myuri.web.render :as render]

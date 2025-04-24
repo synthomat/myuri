@@ -8,7 +8,14 @@
            ring/ring-jetty-adapter             {:mvn/version "1.10.0"}
            ring-cors/ring-cors                 {:mvn/version "0.1.13"}
            ring/ring-anti-forgery              {:mvn/version "1.3.0"}
-           metosin/reitit                      {:mvn/version "0.7.0-alpha7"}
+           ;metosin/reitit                      {:mvn/version "0.7.0-alpha7"}
+           metosin/reitit-core                 {:mvn/version "0.8.0"}
+           metosin/reitit-malli                {:mvn/version "0.8.0"}
+           metosin/reitit-interceptors         {:mvn/version "0.8.0"}
+           metosin/muuntaja                    {:mvn/version "0.6.11"}
+           metosin/reitit-ring                 {:mvn/version "0.8.0"}
+           metosin/reitit-middleware           {:mvn/version "0.8.0"}
+
            selmer/selmer                       {:mvn/version "1.12.59"}
 
            ;; Authn & Authz ---------------------------------------------------
@@ -17,18 +24,17 @@
 
            ;; Database Layer --------------------------------------------------
            org.postgresql/postgresql           {:mvn/version "42.6.0"}
-           migratus/migratus                   {:mvn/version "1.5.3"} ; DB Migrations
-           seancorfield/next.jdbc              {:mvn/version "1.2.659"} ; JDBC
-           com.github.seancorfield/honeysql    {:mvn/version "2.5.1091"} ; SQL Abstraction
+           seancorfield/next.jdbc              {:mvn/version "1.2.659"} ; DB Migrations
+           com.github.seancorfield/honeysql    {:mvn/version "2.5.1091"} ; JDBC
+           migratus/migratus                   {:mvn/version "1.5.3"} ; SQL Abstraction
 
            ;; Various Libraries -----------------------------------------------
            cheshire/cheshire                   {:mvn/version "5.12.0"} ; JSON Lib
-           com.draines/postal                  {:mvn/version "2.0.5"} ; SMTP Client
-           metosin/malli                       {:mvn/version "0.13.0"} ; Validation
+           ;com.draines/postal                  {:mvn/version "2.0.5"} ; SMTP Client
            clojure.java-time/clojure.java-time {:mvn/version "1.4.2"}
 
            clj-http/clj-http                   {:mvn/version "3.13.0"} ; HTTP Client
-           org.clj-commons/hickory             {:mvn/version "0.7.4"} ; HTML parser
+           ;org.clj-commons/hickory             {:mvn/version "0.7.4"} ; HTML parser
            }
 
 
